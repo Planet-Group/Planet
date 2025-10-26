@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <!-- Viewport Meta Tag -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- NEUER TITEL -->
-    <title>Google Signature Generator</title>
+    <!-- TITEL GEÄNDERT -->
+    <title>Your Planet Signature</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +33,9 @@
                         sans: ['"neue-haas-grotesk-display"', 'sans-serif'],
                     },
                     borderRadius: {
-                        'xl': '1.0rem', // Planet UI verwendet ausgeprägte Rundungen
+                        'xl': '1.0rem',
+                        // Hinzufügen von 'full' für maximale Abrundung, falls es nicht standardmäßig geladen wird
+                        'full': '9999px',
                     }
                 }
             }
@@ -71,7 +73,8 @@
         }
     </style>
 </head>
-<body class="bg-brand-gray-light font-sans text-brand-gray-dark">
+<!-- HINTERGRUND GEÄNDERT: von bg-brand-gray-light zu bg-white -->
+<body class="bg-white font-sans text-brand-gray-dark">
 
     <!-- HEADER ENTFERNT -->
 
@@ -81,9 +84,9 @@
         <!-- App-Container-Karte ENTFERNT -->
             
             <div class="p-6 md:p-8">
-                 <!-- NEUER TITEL - JETZT KLEINER UND SCHWARZ -->
+                 <!-- ÜBERSCHRIFT GEÄNDERT -->
                  <h2 class="text-2xl font-bold text-brand-gray-dark mb-6">
-                    Google Signature Generator
+                    Your Planet Signature
                 </h2>
                 <!-- INTRO-TEXT ENTFERNT -->
             </div>
@@ -95,36 +98,40 @@
                 <form id="signature-form" class="p-6 md:p-8 space-y-5">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                        <input type="text" id="name" value="Name" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. John Doe">
+                        <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                        <input type="text" id="name" value="Name" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="e.g. John Doe">
                     </div>
                     
                     <div>
                         <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Position / Title</label>
-                        <!-- VORAUSGEFÜLLT -->
-                        <input type="text" id="position" value="Job Title" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. Marketing Manager">
+                        <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                        <input type="text" id="position" value="Job Title" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="e.g. Marketing Manager">
                     </div>
                     
                     <!-- NEUES FELD: Zitat -->
                     <div>
                         <label for="quote" class="block text-sm font-medium text-gray-700 mb-1">Quote (Optional)</label>
-                        <!-- VORAUSGEFÜLLT (mit Korrektur "Where") -->
-                        <input type="text" id="quote" value="Where focus goes, energy flows" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. An inspiring quote">
+                        <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                        <input type="text" id="quote" value="Where focus goes, energy flows" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="e.g. An inspiring quote">
                     </div>
 
                     <!-- GEÄNDERT: Unternehmen als Freitext -->
                     <div>
                         <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                        <input type="text" id="company" value="Plnt Group GmbH" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. Plnt Group GmbH">
+                        <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                        <input type="text" id="company" value="Plnt Group GmbH" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="e.g. Plnt Group GmbH">
                     </div>
 
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number (Optional)</label>
-                        <input type="tel" id="phone" value="+49 831 123456" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. +49 831 123456">
+                        <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                        <input type="tel" id="phone" value="+49 831 123456" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="e.g. +49 831 123456">
                     </div>
                     
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
-                        <input type="email" id="email" value="max.mustermann@plnt.group" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="your.email@plnt.group">
+                        <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                        <input type="email" id="email" value="max.mustermann@plnt.group" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="your.email@plnt.group">
                     </div>
 
                     <!-- Adressfelder -->
@@ -132,11 +139,13 @@
                          <h3 class="text-lg font-semibold text-brand-gray-dark mb-2">Company Address</h3>
                          <div>
                             <label for="street" class="block text-sm font-medium text-gray-700 mb-1">Street & House Number</label>
-                            <input type="text" id="street" value="Street 1" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="Street 1">
+                            <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                            <input type="text" id="street" value="Street 1" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="Street 1">
                          </div>
                          <div class="mt-3">
                             <label for="city" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code & City</label>
-                            <input type="text" id="city" value="12345 City" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="12345 City">
+                            <!-- STIL GEÄNDERT: bg-gray-100, rounded-full, kein border, kein shadow, px-4 -->
+                            <input type="text" id="city" value="12345 City" class="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-planet-blue transition-all" placeholder="12345 City">
                         </div>
                     </div>
                 </form>
@@ -152,12 +161,11 @@
                             <!-- Die Signatur-Vorschau wird hier von JS eingefügt -->
                         </div>
                     </div>
-
-                    <button id="copy-button" class="w-full mt-6 bg-planet-blue text-white px-5 py-3 rounded-md shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex items-center justify-center space-x-2 active:scale-95">
-                        <span class="material-icons-outlined">
-                            content_copy
-                        </span>
-                        <span>Copy Signature to Clipboard</span>
+                    
+                    <!-- BUTTON-STIL GEÄNDERT: rounded-full, kein shadow, kein space-x-2 -->
+                    <button id="copy-button" class="w-full mt-6 bg-planet-blue text-white px-5 py-3 rounded-full hover:scale-[1.02] transition-all duration-300 ease-in-out flex items-center justify-center active:scale-95">
+                        <!-- ICON ENTFERNT, TEXT GEÄNDERT -->
+                        <span>Copy</span>
                     </button>
                     <p id="copy-feedback" class="text-center text-green-600 font-semibold mt-3 h-4 transition-all opacity-0">
                         Signature copied!
@@ -278,6 +286,14 @@
                            </td>
                        </tr>
                        <!-- Spacer nach Zitat -->
+                       <tr><td ${tdSpacerSmall}>&nbsp;</td></tr>
+                       <!-- NEU: Zweiter Geviertstrich unter dem Zitat -->
+                       <tr>
+                           <td ${tdStyle}>
+                               <strong ${boldStyle}><font face="Arial" color="#333333">—</font></strong>
+                           </td>
+                       </tr>
+                       <!-- Spacer nach zweitem Geviertstrich -->
                        <tr><td ${tdSpacerSmall}>&nbsp;</td></tr>`
                     : '';
 
@@ -460,4 +476,5 @@
     </script>
 </body>
 </html>
+
 
