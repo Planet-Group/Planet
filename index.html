@@ -1,325 +1,463 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Viewport Meta Tag -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktiver Zeitplan</title>
+    <!-- NEUER TITEL -->
+    <title>Google Signature Generator</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (Inter as a replacement for Neue Haas Grotesk) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-
+    <!-- Adobe Font: Neue Haas Grotesk Display Pro -->
+    <link rel="stylesheet" href="https://use.typekit.net/nui4jqa.css">
+    
     <!-- Google Material Icons (Outlined) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-
+    
+    <!-- Tailwind Konfiguration für Planet UI -->
     <script>
-        // Custom Tailwind configuration to implement the "Planet UI" design system
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         'planet-blue': '#0000FF',
                         'planet-lime': '#D4FF00',
-                        'light-gray': '#F5F5F5',
-                        'medium-gray': '#CCCCCC',
-                        'dark-gray': '#333333',
+                        'brand-gray-light': '#F5F5F5',
+                        'brand-gray-medium': '#CCCCCC',
+                        'brand-gray-dark': '#333333',
                     },
                     fontFamily: {
-                        // Per user request, using a Google Font alternative
-                        sans: ['Inter', 'sans-serif'],
+                        // Setzt "neue-haas-grotesk-display" als Standard-Sans-Serif-Schriftart
+                        sans: ['"neue-haas-grotesk-display"', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '1.0rem', // Planet UI verwendet ausgeprägte Rundungen
                     }
                 }
             }
         }
     </script>
+    
     <style>
-        /* Small adjustments for a cleaner look */
-        .timeline-item:last-child .timeline-line {
-            display: none;
+        /* Fallback für die Schriftart, falls Tailwind-Konfiguration nicht greift */
+        body {
+            font-family: "neue-haas-grotesk-display", sans-serif;
+        }
+        /* Versteckt das Div, das nur für den Kopiervorgang da ist */
+        #signature-html-container {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+        
+        /* Erzwingt Arial in der Vorschau, um Web-Schriftarten zu überschreiben */
+        #signature-preview, #signature-preview * {
+             font-family: Arial, Helvetica, sans-serif !important;
+        }
+        #signature-preview p {
+            margin: 0;
+            padding: 0;
+        }
+        /* Stellt sicher, dass Tabellen in der Vorschau korrekt angezeigt werden */
+        #signature-preview table {
+            border-collapse: collapse;
+        }
+        #signature-preview td {
+            padding: 0;
+            margin: 0;
+            line-height: 1.3; /* Engerer Zeilenabstand als Standard */
         }
     </style>
 </head>
-<body class="bg-light-gray font-sans text-dark-gray">
+<body class="bg-brand-gray-light font-sans text-brand-gray-dark">
 
-    <!-- Header -->
-    <header class="bg-planet-blue text-white p-4 shadow-md">
-        <div class="max-w-7xl mx-auto flex items-baseline space-x-4">
-            <h1 class="text-2xl font-bold tracking-wider">Planet</h1>
-            <span class="text-xl font-light tracking-wide">Mission Team Tagung</span>
-        </div>
-    </header>
+    <!-- HEADER ENTFERNT -->
 
-    <!-- Main Content Container -->
-    <main class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Hauptcontainer der Anwendung -->
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
         
-        <div class="bg-white rounded-xl border border-medium-gray shadow-md p-6 sm:p-8">
-            <div class="mb-6">
-                <h2 class="text-3xl font-bold text-dark-gray">Team Offsite Zeitplan</h2>
-                <p class="text-gray-500 mt-1">Ein Überblick über die geplanten Aktivitäten und Termine.</p>
+        <!-- App-Container-Karte ENTFERNT -->
+            
+            <div class="p-6 md:p-8">
+                 <!-- NEUER TITEL - JETZT KLEINER UND SCHWARZ -->
+                 <h2 class="text-2xl font-bold text-brand-gray-dark mb-6">
+                    Google Signature Generator
+                </h2>
+                <!-- INTRO-TEXT ENTFERNT -->
             </div>
 
-            <!-- Timeline Day: Montag -->
-            <div class="day-container mb-6">
-                <div id="day-header-1" class="flex justify-between items-center cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <!-- Haupt-Grid: Formular links, Vorschau rechts - JETZT OHNE LINIE -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8">
+                
+                <!-- Linke Spalte: Formular -->
+                <form id="signature-form" class="p-6 md:p-8 space-y-5">
                     <div>
-                        <h3 class="text-xl font-bold text-planet-blue">Montag</h3>
-                        <p class="text-sm text-gray-500">20.10.25</p>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                        <input type="text" id="name" value="Name" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. John Doe">
                     </div>
-                    <span class="material-icons-outlined transition-transform transform">expand_more</span>
-                </div>
-                <div id="day-content-1" class="day-content overflow-hidden transition-all duration-500 ease-in-out" style="max-height: 500px;">
-                    <div class="pt-6 pl-4">
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">groups</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">bis 13:45 Uhr</p>
-                                <h4 class="font-semibold text-lg">Treffen & Ankommen</h4>
-                                <p class="text-gray-600 mt-1">Balkan Bäckerei Darmstadt, Adelungstraße 24, 64283 Darmstadt</p>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">fitness_center</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">14:00 - 15:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Aktivität</h4>
-                                <p class="text-gray-600 mt-1">“Hier zählt die richtige Haltung und die passende Einstellung 💪🏼“</p>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                         <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">hotel</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">15:00 - 16:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Anreise Unterkunft</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">integration_instructions</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">17:00 - 19:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Programm C+P</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">restaurant_menu</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">ab 19:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Gemeinsames Kochen & Abendessen</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Timeline Day: Dienstag -->
-            <div class="day-container mb-6">
-                <div id="day-header-2" class="flex justify-between items-center cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    
                     <div>
-                        <h3 class="text-xl font-bold text-planet-blue">Dienstag</h3>
-                        <p class="text-sm text-gray-500">21.10.25</p>
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Position / Title</label>
+                        <!-- VORAUSGEFÜLLT -->
+                        <input type="text" id="position" value="Job Title" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. Marketing Manager">
                     </div>
-                    <span class="material-icons-outlined transition-transform transform rotate-180">expand_more</span>
-                </div>
-                <div id="day-content-2" class="day-content overflow-hidden transition-all duration-500 ease-in-out" style="max-height: 0px;">
-                     <div class="pt-6 pl-4">
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">free_breakfast</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">08:00 - 09:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Frühstück</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">work</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">09:00 - 12:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Programm</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                         <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">lunch_dining</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">13:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Mittagessen</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">celebration</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">14:00 - 17:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Teamevent Aktivität</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">dinner_dining</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">ab 17:30 Uhr</p>
-                                <h4 class="font-semibold text-lg">Gemeinsames Kochen & Abendessen</h4>
-                            </div>
-                        </div>
-                         <!-- Timeline Item -->
-                         <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">nightlife</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">ab 20:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Teamevent Aktivität</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Timeline Day: Mittwoch -->
-            <div class="day-container">
-                <div id="day-header-3" class="flex justify-between items-center cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    
+                    <!-- NEUES FELD: Zitat -->
                     <div>
-                        <h3 class="text-xl font-bold text-planet-blue">Mittwoch</h3>
-                        <p class="text-sm text-gray-500">22.10.25</p>
+                        <label for="quote" class="block text-sm font-medium text-gray-700 mb-1">Quote (Optional)</label>
+                        <!-- VORAUSGEFÜLLT (mit Korrektur "Where") -->
+                        <input type="text" id="quote" value="Where focus goes, energy flows" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. An inspiring quote">
                     </div>
-                    <span class="material-icons-outlined transition-transform transform rotate-180">expand_more</span>
-                </div>
-                <div id="day-content-3" class="day-content overflow-hidden transition-all duration-500 ease-in-out" style="max-height: 0px;">
-                    <div class="pt-6 pl-4">
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">free_breakfast</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">08:00 - 09:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Frühstück</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                        <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">fact_check</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">09:00 - 10:30 Uhr</p>
-                                <h4 class="font-semibold text-lg">Programm</h4>
-                            </div>
-                        </div>
-                        <!-- Timeline Item -->
-                         <div class="timeline-item flex">
-                            <div class="flex flex-col items-center mr-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-planet-blue/10 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-planet-blue">logout</span>
-                                </div>
-                                <div class="w-px h-full bg-medium-gray timeline-line"></div>
-                            </div>
-                            <div class="pb-8">
-                                <p class="mb-1 text-sm text-gray-500">11:00 Uhr</p>
-                                <h4 class="font-semibold text-lg">Abreise / Check Out</h4>
-                            </div>
+
+                    <!-- GEÄNDERT: Unternehmen als Freitext -->
+                    <div>
+                        <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                        <input type="text" id="company" value="Plnt Group GmbH" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. Plnt Group GmbH">
+                    </div>
+
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number (Optional)</label>
+                        <input type="tel" id="phone" value="+49 831 123456" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="e.g. +49 831 123456">
+                    </div>
+                    
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+                        <input type="email" id="email" value="max.mustermann@plnt.group" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="your.email@plnt.group">
+                    </div>
+
+                    <!-- Adressfelder -->
+                    <div class="border-t border-brand-gray-medium pt-5">
+                         <h3 class="text-lg font-semibold text-brand-gray-dark mb-2">Company Address</h3>
+                         <div>
+                            <label for="street" class="block text-sm font-medium text-gray-700 mb-1">Street & House Number</label>
+                            <input type="text" id="street" value="Street 1" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="Street 1">
+                         </div>
+                         <div class="mt-3">
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code & City</label>
+                            <input type="text" id="city" value="12345 City" class="w-full px-3 py-2 border border-brand-gray-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-planet-blue focus:border-transparent transition-all" placeholder="12345 City">
                         </div>
                     </div>
+                </form>
+
+                <!-- Rechte Spalte: Vorschau und Kopier-Button -->
+                <!-- HELLGRAUER HINTERGRUND ENTFERNT -->
+                <div class="p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-brand-gray-dark mb-4">Preview</h3>
+                    
+                    <!-- VORSCHAU-KASTEN WIEDERHERGESTELLT -->
+                    <div class="border border-brand-gray-medium rounded-lg p-4 bg-white min-h-[200px] shadow-inner">
+                        <div id="signature-preview" style="font-size: 10pt;">
+                            <!-- Die Signatur-Vorschau wird hier von JS eingefügt -->
+                        </div>
+                    </div>
+
+                    <button id="copy-button" class="w-full mt-6 bg-planet-blue text-white px-5 py-3 rounded-md shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex items-center justify-center space-x-2 active:scale-95">
+                        <span class="material-icons-outlined">
+                            content_copy
+                        </span>
+                        <span>Copy Signature to Clipboard</span>
+                    </button>
+                    <p id="copy-feedback" class="text-center text-green-600 font-semibold mt-3 h-4 transition-all opacity-0">
+                        Signature copied!
+                    </p>
+
+                    <!-- ANLEITUNG OHNE KASTEN/TITEL - JETZT ERWEITERT -->
+                    <div class="mt-8 space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-brand-gray-dark mb-3">Instructions: Gmail (Browser)</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-700 text-sm">
+                                <li>Click on <strong class="text-brand-gray-dark">"Copy Signature to Clipboard"</strong>.</li>
+                                <li>Open <a href="https://mail.google.com/mail/u/0/#settings/general" target="_blank" class="text-planet-blue hover:underline">Google Mail</a> and go to <strong class="text-brand-gray-dark">Settings</strong> (Gear icon > "See all settings").</li>
+                                <li>In the <strong class="text-brand-gray-dark">"General"</strong> tab, scroll down to the <strong class="text-brand-gray-dark">"Signature"</strong> section.</li>
+                                <li>Click on <strong class="text-brand-gray-dark">"Create new"</strong>, give your signature a name (e.g., "Planet"), and click "Create".</li>
+                                <li>Paste the copied signature into the text box on the right (using <strong class="text-brand-gray-dark">Ctrl+V</strong> or <strong class="text-brand-gray-dark">Cmd+V</strong>).</li>
+                                <li>Below, set the <strong class="text-brand-gray-dark">Signature defaults</strong> for new emails and replies/forwards to your new signature.</li>
+                                <li>Scroll to the bottom and click <strong class="text-brand-gray-dark">"Save Changes"</strong>.</li>
+                            </ol>
+                            <!-- HINWEIS FÜR MOBILE BROWSER HINZUGEFÜGT -->
+                            <p class="text-gray-700 text-sm mt-3">
+                                <strong class="text-brand-gray-dark">On a mobile browser (e.g., Chrome/Safari on your phone):</strong> You must first request the <strong class="text-brand-gray-dark">"Desktop site"</strong> in your browser's settings. The page will reload, and you can then follow the exact same steps above.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold text-brand-gray-dark mb-3">Instructions: Outlook (Desktop App)</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-700 text-sm">
+                                <li>Click on <strong class="text-brand-gray-dark">"Copy Signature to Clipboard"</strong>.</li>
+                                <li>Open Outlook and create a <strong class="text-brand-gray-dark">New Email</strong>.</li>
+                                <li>In the ribbon, click <strong class="text-brand-gray-dark">"Signature"</strong> > <strong class="text-brand-gray-dark">"Signatures..."</strong>.</li>
+                                <li>Click <strong class="text-brand-gray-dark">"New"</strong>, enter a name (e.g., "Planet"), and click OK.</li>
+                                <li>Paste the copied signature into the edit box below (using <strong class="text-brand-gray-dark">Ctrl+V</strong>).</li>
+                                <li>On the right, under <strong class="text-brand-gray-dark">"Choose default signature"</strong>, select your new signature for "New messages" and "Replies/forwards".</li>
+                                <li>Click <strong class="text-brand-gray-dark">"OK"</strong>.</li>
+                            </ol>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold text-brand-gray-dark mb-3">Instructions: Apple Mail (macOS)</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-700 text-sm">
+                                <li>Click on <strong class="text-brand-gray-dark">"Copy Signature to Clipboard"</strong>.</li>
+                                <li>Open the <strong class="text-brand-gray-dark">Mail</strong> app.</li>
+                                <li>In the menu bar, go to <strong class="text-brand-gray-dark">"Mail"</strong> > <strong class="text-brand-gray-dark">"Settings..."</strong> (or "Preferences...").</li>
+                                <li>Click the <strong class="text-brand-gray-dark">"Signatures"</strong> tab.</li>
+                                <li>Select your email account on the left and click the <strong class="text-brand-gray-dark">+</strong> icon to create a new signature.</li>
+                                <li>Paste the copied signature into the right-hand panel.</li>
+                                <li><strong class="text-brand-gray-dark">IMPORTANT:</strong> Uncheck the box labeled <strong class="text-brand-gray-dark">"Always match my default message font"</strong>. Otherwise, the formatting will be destroyed.</li>
+                                <li>Drag the name of your new signature (middle column) onto your email account (left column) to assign it.</li>
+                            </ol>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold text-brand-gray-dark mb-3">Important Note for Mobile Apps (iOS/Android)</h4>
+                            <p class="text-gray-700 text-sm">
+                                Most mobile email apps (especially the <strong class="text-brand-gray-dark">Gmail app</strong>) do <strong class="text-brand-gray-dark">not</strong> support HTML signatures. They use separate "Mobile Signatures" which often only allow plain text.
+                                <br><br>
+                                The signature you create here will work reliably in browser and desktop clients, but it will <strong class="text-brand-gray-dark">not</strong> automatically sync to your mobile app. You must set up your mobile signature (if desired) separately in the app's settings.
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
+                
             </div>
-
-        </div>
-
+        <!-- Schließendes div der App-Container-Karte ENTFERNT -->
     </main>
     
+    <!-- Unsichtbarer Container für den Kopiervorgang -->
+    <div id="signature-html-container"></div>
+
     <script>
-        // JavaScript for interactive collapsible sections
-        document.addEventListener('DOMContentLoaded', function () {
-            const dayHeaders = document.querySelectorAll('[id^="day-header-"]');
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- DATENBANK ---
+            // NEUER LOGO-LINK
+            var cdnLogoUrl = "https://image.s51.sfmc-content.com/lib/fe2711737364047b7d1375/m/1/3004ead3-5e20-4522-9104-a841e66f41f3.png";
 
-            dayHeaders.forEach(header => {
-                header.addEventListener('click', () => {
-                    const contentId = header.id.replace('header', 'content');
-                    const content = document.getElementById(contentId);
-                    const icon = header.querySelector('.material-icons-outlined');
+            // --- ELEMENT-REFERENZEN --- (const zu var geändert)
+            var form = document.getElementById('signature-form');
+            var nameInput = document.getElementById('name');
+            var positionInput = document.getElementById('position');
+            var quoteInput = document.getElementById('quote'); // NEU
+            var companyInput = document.getElementById('company'); // GEÄNDERT
+            var phoneInput = document.getElementById('phone');
+            var emailInput = document.getElementById('email');
+            var streetInput = document.getElementById('street');
+            var cityInput = document.getElementById('city');
+            
+            var preview = document.getElementById('signature-preview');
+            var copyButton = document.getElementById('copy-button');
+            var copyFeedback = document.getElementById('copy-feedback');
+            var htmlContainer = document.getElementById('signature-html-container');
 
-                    if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
-                        // Expand the content
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                        icon.classList.remove('rotate-180');
+            // --- FUNKTIONEN ---
+            
+            /**
+             * Generiert das HTML für die Signatur.
+             * SCHRIFTGRÖSSE (size="2") ENTFERNT
+             * FRANZÖSISCHE ANFÜHRUNGSZEICHEN HINZUGEFÜGT
+             */
+            function generateSignatureHTML(data) {
+                
+                // Stil-Definitionen für die Tabellenzellen (const zu var geändert)
+                // Zeilenabstand wieder auf 5px reduziert
+                var tdStyle = 'style="margin: 0; padding: 0; line-height: 1.3;"';
+                var tdSpacerSmall = 'style="margin: 0; padding: 0; line-height: 5px; height: 5px; font-size: 5px; mso-line-height-rule:exactly;"';
+                var tdSpacerBig = 'style="margin: 0; padding: 0; line-height: 25px; height: 25px; font-size: 25px; mso-line-height-rule:exactly;"';
+                
+                // Brute-Force-Bold-Stil (const zu var geändert)
+                var boldStyle = 'style="font-weight: bold;"';
+
+                // NEU: Zitat-HTML (const zu var geändert)
+                var quoteHTML = data.quote 
+                    ? `<!-- Zitat (optional) -->
+                       <tr>
+                           <td ${tdStyle}>
+                               <strong ${boldStyle}><font face="Arial" color="#333333">»${data.quote}«</font></strong>
+                           </td>
+                       </tr>
+                       <!-- Spacer nach Zitat -->
+                       <tr><td ${tdSpacerSmall}>&nbsp;</td></tr>`
+                    : '';
+
+                var phoneHTML = data.phone 
+                    ? `<!-- Telefon (optional) -->
+                       <tr>
+                           <td ${tdStyle}>
+                               <a href="tel:${data.phone.replace(/\s/g, '')}" style="color: #999999; text-decoration: none;">
+                                   <strong ${boldStyle}><font face="Arial" color="#999999">${data.phone}</font></strong>
+                               </a>
+                           </td>
+                       </tr>` 
+                    : '';
+                
+                // Dies ist das HTML, das in die Zwischenablage kopiert wird.
+                return `
+                    <table cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; width: 100%; max-width: 500px;">
+                        <tbody>
+                            <!-- Geviertstrich als erste Zeile -->
+                            <tr>
+                                <td ${tdStyle}>
+                                    <strong ${boldStyle}><font face="Arial" color="#333333">—</font></strong>
+                                </td>
+                            </tr>
+                            
+                            <!-- Abstand nach Geviertstrich -->
+                            <tr><td ${tdSpacerSmall}>&nbsp;</td></tr>
+
+                            <!-- NEU: Zitat (wird hier eingefügt, wenn vorhanden) -->
+                            ${quoteHTML}
+
+                            <!-- 1. Kontaktdaten -->
+                            <!-- Name -->
+                            <tr>
+                                <td ${tdStyle}>
+                                    <strong ${boldStyle}><font face="Arial" color="#333333">${data.name}</font></strong>
+                                </td>
+                            </tr>
+                            
+                            <!-- Position (JETZT GRAU) -->
+                            <tr>
+                                <td ${tdStyle}>
+                                    <strong ${boldStyle}><font face="Arial" color="#999999">${data.position}</font></strong>
+                                </td>
+                            </tr>
+                            
+                            <!-- Spacer 1 -->
+                            <tr><td ${tdSpacerSmall}>&nbsp;</td></tr>
+
+                            <!-- Email (JETZT GRAU) -->
+                            <tr>
+                                <td ${tdStyle}>
+                                    <a href="mailto:${data.email}" style="color: #999999; text-decoration: none;">
+                                        <strong ${boldStyle}><font face="Arial" color="#999999">${data.email}</font></strong>
+                                    </a>
+                                </td>
+                            </tr>
+                            ${phoneHTML}
+
+                            <!-- Spacer 2 -->
+                            <tr><td ${tdSpacerSmall}>&nbsp;</td></tr>
+
+                            <!-- Adresse (JETZT GRAU, AUSSER FIRMA) -->
+                            <tr>
+                                <td ${tdStyle}>
+                                    <strong ${boldStyle}><font face="Arial" color="#333333">${data.companyName}</font></strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td ${tdStyle}>
+                                    <strong ${boldStyle}><font face="Arial" color="#999999">${data.street}</font></strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td ${tdStyle}>
+                                    <strong ${boldStyle}><font face="Arial" color="#999999">${data.city}</font></strong>
+                                </td>
+                            </tr>
+                            
+                            <!-- 2. Logo -->
+                            <!-- Spacer 3 (Größerer Abstand) -->
+                            <tr><td ${tdSpacerBig}>&nbsp;</td></tr>
+                            
+                            <!-- Logo-Bild (CDN-Link mit responsiver Breite UND festem width-Attribut für Gmail) -->
+                            <tr>
+                                <td style="margin: 0; padding: 0; line-height: 1;">
+                                    <!-- LOGO-FIX FÜR GMAIL: width="500" hinzugefügt, max-width bleibt im Style für responsive Clients -->
+                                    <img src="${data.logoUrl}" alt="Planet Group Logo" width="500" style="display: block; width: 100%; max-width: 500px; height: auto; border: 0;">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+            }
+
+
+            /**
+             * Aktualisiert die Vorschau und die Adressfelder basierend auf der Formularauswahl.
+             */
+            function updatePreview() {
+                // GEÄNDERT: Liest jetzt alle Werte direkt aus den Textfeldern (const zu var geändert)
+                var signatureData = {
+                    name: nameInput.value,
+                    position: positionInput.value,
+                    quote: quoteInput.value, // NEU
+                    phone: phoneInput.value,
+                    email: emailInput.value,
+                    companyName: companyInput.value, // GEÄNDERT
+                    logoUrl: cdnLogoUrl, // GEÄNDERT
+                    street: streetInput.value,
+                    city: cityInput.value
+                };
+                
+                var signatureHtml = generateSignatureHTML(signatureData);
+                
+                // Vorschau aktualisieren
+                preview.innerHTML = signatureHtml;
+                
+                // Versteckten Container für Kopiervorgang aktualisieren
+                htmlContainer.innerHTML = signatureHtml;
+            }
+            
+            /**
+             * Kopiert das generierte Signatur-HTML in die Zwischenablage.
+             */
+            function copySignature() {
+                try {
+                    // Erstelle einen Range, um den Inhalt des unsichtbaren Divs auszuwählen (const zu var geändert)
+                    var range = document.createRange();
+                    range.selectNode(htmlContainer);
+                    
+                    // Entferne alle vorhandenen Auswahlen und füge die neue hinzu (const zu var geändert)
+                    var selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    // Führe den Kopierbefehl aus (const zu var geändert)
+                    var successful = document.execCommand('copy');
+                    
+                    if (successful) {
+                        // Feedback anzeigen
+                        copyFeedback.classList.remove('opacity-0');
+                        copyButton.classList.remove('bg-planet-blue');
+                        copyButton.classList.add('green-600');
                     } else {
-                        // Collapse the content
-                        content.style.maxHeight = '0px';
-                        icon.classList.add('rotate-180');
+                        throw new Error('Copying failed');
                     }
-                });
+                    
+                    // Auswahl wieder aufheben
+                    selection.removeAllRanges();
+
+                } catch (err) {
+                    console.error('Error copying signature:', err);
+                    alert('Copying failed. Please copy manually.');
+                }
+            }
+
+            // --- EVENT LISTENERS ---
+            form.addEventListener('input', updatePreview); // Aktualisiert bei JEDER Eingabe
+            // 'change'-Listener ist nicht mehr nötig, da wir kein <select> mehr haben
+            copyButton.addEventListener('click', () => {
+                copySignature();
+                // Feedback anzeigen
+                copyFeedback.classList.remove('opacity-0');
+                copyButton.classList.remove('bg-planet-blue');
+                copyButton.classList.add('bg-green-600');
+                
+                // Feedback ausblenden und Button zurücksetzen
+                setTimeout(() => {
+                    copyFeedback.classList.add('opacity-0');
+                    copyButton.classList.remove('bg-green-600');
+                    copyButton.classList.add('bg-planet-blue');
+                }, 2500);
             });
+            
+            // --- INITIALISIERUNG ---
+            // Beim Laden der Seite die Vorschau initial erstellen
+            updatePreview();
         });
     </script>
-
 </body>
 </html>
 
