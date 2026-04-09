@@ -1,0 +1,448 @@
+import React, { useState, useRef } from 'react';
+
+// Main App component
+const App = () => {
+    // State to store selected image files
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    // State to store processed (cropped) image data URLs
+    const [croppedImages, setCroppedImages] = useState([]);
+    // State to manage loading indicator
+    const [isLoading, setIsLoading] = useState(false);
+    // Ref for the hidden file input element
+    const fileInputRef = useRef(null);
+
+    // Helper function to generate the standardized file name: [OriginalName]_[Format].jpg
+    const getFormattedFileName = (originalName, format) => {
+        // Split the original file name to separate the name from the extension
+        const parts = originalName.split('.');
+        // Take the first part (the filename before the first dot)
+        const name = parts[0]; 
+        // Return the new filename with format suffix and fixed .jpg extension
+        return `${name}_${format}.jpg`;
+    };
+
+    // Function to handle file input change
+    const handleFileChange = (event) => {
+        // Get files from the event, filter for images (jpg, png)
+        const files = Array.from(event.target.files).filter(file =>
+            file.type === 'image/jpeg' || file.type === 'image/png'
+        );
+        setSelectedFiles(prevFiles => [...prevFiles, ...files]); // Add new files to existing ones
+    };
+
+    // Function to trigger the hidden file input click
+    const handleUploadClick = () => {
+        fileInputRef.current.click();
+    };
+
+    // Function to remove a selected file
+    const removeFile = (indexToRemove) => {
+        setSelectedFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove));
+        // Clearing all cropped images to avoid misalignment when original files change.
+        setCroppedImages([]);
+    };
+
+    // Helper function to process initial image width (crop horizontally if > maxWidth)
+    // This function ensures the image width is capped at maxWidth (1080px) by cropping sides.
+    const processInitialWidth = (image, maxWidth) => {
+        return new Promise((resolve, reject) => {
+            const originalWidth = image.naturalWidth;
+            const originalHeight = image.naturalHeight;
+
+            if (originalWidth <= maxWidth) {
+                // No cropping/resizing needed, resolve with the original image
+                resolve(image);
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas dimensions to the target width and original height
+            canvas.width = maxWidth;
+            canvas.height = originalHeight;
+
+            // Calculate the starting X position to center the 1080px crop
+            const startX = (originalWidth - maxWidth) / 2;
+
+            // Draw the original image onto the new canvas, cropping horizontally
+            // Parameters: image, sourceX, sourceY, sourceWidth, sourceHeight,
+            //             destX, destY, destWidth, destHeight
+            ctx.drawImage(image, startX, 0, maxWidth, originalHeight, 0, 0, maxWidth, originalHeight);
+
+            // Convert the canvas content back to an Image object
+            const processedImg = new Image();
+            processedImg.onload = () => resolve(processedImg);
+            processedImg.onerror = () => reject(new Error("Fehler beim Laden des zugeschnittenen Bildes von Canvas."));
+            processedImg.src = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG for consistency
+        });
+    };
+
+    // Main function to process (crop) images
+    const processImages = async () => {
+        setIsLoading(true); // Show loading indicator
+        setCroppedImages([]); // Clear previous cropped images
+
+        const processed = [];
+        for (const file of selectedFiles) {
+            let imageUrl = null; // Declare imageUrl outside try block
+            try {
+                imageUrl = URL.createObjectURL(file); // Assign imageUrl here
+                const img = new Image();
+
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = imageUrl;
+                });
+
+                // First, process the image width: crop horizontally if wider than 1080px
+                const initialProcessedImg = await processInitialWidth(img, 1080);
+
+                // Then, crop to 9:16 using the initially processed image (this will crop top/bottom)
+                const cropped9x16 = await cropImage(initialProcessedImg, 9 / 16); // Target aspect ratio W/H
+                // Crop to 4:5 using the initially processed image (this will crop top/bottom)
+                const cropped4x5 = await cropImage(initialProcessedImg, 4 / 5); // Target aspect ratio W/H
+                // Crop to 1:1 using the initially processed image (this will crop top/bottom)
+                const cropped1x1 = await cropImage(initialProcessedImg, 1 / 1); // Target aspect ratio W/H
+
+                processed.push({
+                    originalFileName: file.name,
+                    dataUrl9x16: cropped9x16, // New 9:16 data URL
+                    dataUrl4x5: cropped4x5,
+                    dataUrl1x1: cropped1x1,
+                });
+            } catch (error) {
+                console.error(`Error processing image ${file.name}:`, error);
+                // Handle error (e.g., show a message to the user)
+                processed.push({
+                    originalFileName: file.name,
+                    error: "Fehler beim Verarbeiten des Bildes." // Error message in German
+                });
+            } finally {
+                // Only revoke if imageUrl was successfully created
+                if (imageUrl) {
+                    URL.revokeObjectURL(imageUrl); // Clean up object URL after image is loaded/processed
+                }
+            }
+        }
+        setCroppedImages(processed);
+        setIsLoading(false); // Hide loading indicator
+    };
+
+    // Helper function to perform the actual cropping (top/bottom for 9:16 to 4:5/1:1)
+    // This function assumes the image has already been processed for its width (max 1080px).
+    const cropImage = (image, targetAspectRatio) => {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const currentWidth = image.naturalWidth;
+            const currentHeight = image.naturalHeight;
+
+            let cropWidth = currentWidth; // Keep the full width (which is now max 1080px)
+            let cropHeight = currentWidth / targetAspectRatio; // Calculate height based on target aspect ratio
+
+            let startX = 0;
+            let startY = 0;
+
+            // If the calculated cropHeight is greater than the current image height,
+            if (cropHeight > currentHeight) {
+                // We must be limited by height and crop width (sides).
+                cropHeight = currentHeight;
+                cropWidth = currentHeight * targetAspectRatio;
+                startX = (currentWidth - cropWidth) / 2; // Center horizontally
+                startY = 0;
+            } else {
+                // If cropHeight is less than or equal to currentHeight, we crop top/bottom
+                startY = (currentHeight - cropHeight) / 2; // Center vertically
+            }
+
+            // Set canvas dimensions to the cropped dimensions
+            canvas.width = cropWidth;
+            canvas.height = cropHeight;
+
+            // Draw the image onto the canvas, cropping it
+            // Parameters: image, sourceX, sourceY, sourceWidth, sourceHeight,
+            //             destX, destY, destWidth, destHeight
+            ctx.drawImage(
+                image,
+                startX, startY, cropWidth, cropHeight,
+                0, 0, cropWidth, cropHeight
+            );
+
+            // Get the data URL of the cropped image
+            resolve(canvas.toDataURL('image/jpeg', 0.9)); // Use JPEG for smaller file size, quality 0.9
+        });
+    };
+
+    // Function to download a single image
+    const downloadImage = (dataUrl, fileName) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Function to download all cropped images as a single zip
+    const downloadAllImages = async () => {
+        // This function will fetch a JSZip library from a CDN
+        if (typeof JSZip === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js';
+            script.onload = () => createZipAndDownload();
+            document.body.appendChild(script);
+        } else {
+            createZipAndDownload();
+        }
+    };
+
+    const createZipAndDownload = async () => {
+        const zip = new JSZip();
+        let filesAddedCount = 0;
+
+        for (const item of croppedImages) {
+            if (item.dataUrl9x16) { // Add 9:16 to zip
+                const base64Data = item.dataUrl9x16.split(',')[1];
+                // Use helper function for naming
+                zip.file(getFormattedFileName(item.originalFileName, '9x16'), base64Data, { base64: true });
+                filesAddedCount++;
+            }
+            if (item.dataUrl4x5) {
+                // Remove the "data:image/jpeg;base64," prefix to get raw base64 data
+                const base64Data = item.dataUrl4x5.split(',')[1];
+                // Use helper function for naming
+                zip.file(getFormattedFileName(item.originalFileName, '4x5'), base64Data, { base64: true });
+                filesAddedCount++;
+            }
+            if (item.dataUrl1x1) {
+                const base64Data = item.dataUrl1x1.split(',')[1];
+                // Use helper function for naming
+                zip.file(getFormattedFileName(item.originalFileName, '1x1'), base64Data, { base64: true });
+                filesAddedCount++;
+            }
+        }
+
+        if (filesAddedCount === 0) {
+            // Using a custom message box instead of alert()
+            const messageBox = document.createElement('div');
+            messageBox.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
+            messageBox.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                    <p class="text-lg font-semibold mb-4">Keine Bilder zum Herunterladen gefunden.</p>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                </div>
+            `;
+            document.body.appendChild(messageBox);
+            return;
+        }
+
+        // Generate the zip file
+        zip.generateAsync({ type: "blob" })
+            .then(function (content) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = 'zugeschnittene_bilder.zip';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href); // Clean up the object URL
+            })
+            .catch(error => {
+                console.error("Fehler beim Erstellen der ZIP-Datei:", error);
+                // Using a custom message box instead of alert()
+                const messageBox = document.createElement('div');
+                messageBox.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
+                messageBox.innerHTML = `
+                    <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                        <p class="text-lg font-semibold mb-4">Fehler beim Erstellen der ZIP-Datei: ${error.message || 'Unbekannter Fehler'}</p>
+                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(messageBox);
+            });
+    };
+
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-4 font-sans text-gray-800 flex flex-col items-center">
+            <style>
+                {`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                body {
+                    font-family: 'Inter', sans-serif;
+                }
+                `}
+            </style>
+            <header className="w-full max-w-4xl text-center mb-8">
+                <h1 className="text-4xl font-bold text-indigo-700 mb-2 rounded-lg p-2 bg-white shadow-md">
+                    Bildzuschnitt-App
+                </h1>
+                <p className="text-lg text-gray-600">
+                    Schneiden Sie Bilder in 9:16-, 4:5- und 1:1-Formate zu und beschneiden Sie breite Bilder auf 1080px.
+                </p>
+            </header>
+
+            <main className="w-full max-w-4xl bg-white p-8 rounded-xl shadow-lg mb-8">
+                <div className="flex flex-col items-center mb-6">
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/jpeg, image/png"
+                        onChange={handleFileChange}
+                        className="hidden" // Hide the default file input
+                        ref={fileInputRef}
+                    />
+                    <button
+                        onClick={handleUploadClick}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75"
+                    >
+                        Bilder auswählen
+                    </button>
+                    {selectedFiles.length > 0 && (
+                        <p className="mt-4 text-gray-700 text-center">
+                            <span className="font-medium">{selectedFiles.length}</span> Bild(er) ausgewählt.
+                        </p>
+                    )}
+                </div>
+
+                {selectedFiles.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                            Ausgewählte Bilder
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-96 overflow-y-auto pr-2">
+                            {selectedFiles.map((file, index) => (
+                                <div key={index} className="relative bg-gray-50 p-3 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center">
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        alt={`Vorschau ${file.name}`}
+                                        className="max-w-full h-32 object-contain rounded-md mb-2"
+                                        onLoad={() => URL.revokeObjectURL(URL.createObjectURL(file))} // Clean up object URL
+                                    />
+                                    <p className="text-sm text-gray-600 text-center truncate w-full px-1">
+                                        {file.name}
+                                    </p>
+                                    <button
+                                        onClick={() => removeFile(index)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs leading-none hover:bg-red-600 transition duration-200"
+                                        title="Bild entfernen"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="text-center mt-6">
+                            <button
+                                onClick={processImages}
+                                disabled={isLoading || selectedFiles.length === 0}
+                                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? 'Verarbeite...' : 'Bilder zuschneiden'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {isLoading && (
+                    <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+                        <p className="text-indigo-600 font-medium">Bilder werden zugeschnitten...</p>
+                    </div>
+                )}
+
+                {croppedImages.length > 0 && !isLoading && (
+                    <div>
+                        <h2 className="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                            Zugeschnittene Bilder
+                        </h2>
+                        {/* Changed grid layout to flex column for vertical stacking */}
+                        <div className="flex flex-col gap-6">
+                            {croppedImages.map((item, index) => (
+                                <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 flex flex-col items-center text-center">
+                                    {item.error ? (
+                                        <p className="text-red-600 mb-2">{item.error}</p>
+                                    ) : (
+                                        <>
+                                            <p className="font-medium text-gray-700 mb-3 text-lg">{item.originalFileName}</p>
+                                            {/* Inner flex container for the three formats, responsive */}
+                                            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
+                                                {item.dataUrl9x16 && (
+                                                    <div className="flex flex-col items-center mb-4 sm:mb-0">
+                                                        <img
+                                                            src={item.dataUrl9x16}
+                                                            alt={`${item.originalFileName} (9:16)`}
+                                                            className="w-32 h-56 object-cover rounded-md shadow-sm border border-gray-300 mb-2"
+                                                        />
+                                                        <p className="text-sm text-gray-600 mb-2">9:16 Format</p>
+                                                        <button
+                                                            onClick={() => downloadImage(item.dataUrl9x16, getFormattedFileName(item.originalFileName, '9x16'))}
+                                                            className="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-4 rounded-full shadow-sm transition duration-200"
+                                                        >
+                                                            Herunterladen (9:16)
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {item.dataUrl4x5 && (
+                                                    <div className="flex flex-col items-center mb-4 sm:mb-0">
+                                                        <img
+                                                            src={item.dataUrl4x5}
+                                                            alt={`${item.originalFileName} (4:5)`}
+                                                            className="w-32 h-40 object-cover rounded-md shadow-sm border border-gray-300 mb-2"
+                                                        />
+                                                        <p className="text-sm text-gray-600 mb-2">4:5 Format</p>
+                                                        <button
+                                                            onClick={() => downloadImage(item.dataUrl4x5, getFormattedFileName(item.originalFileName, '4x5'))}
+                                                            className="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-4 rounded-full shadow-sm transition duration-200"
+                                                        >
+                                                            Herunterladen (4:5)
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {item.dataUrl1x1 && (
+                                                    <div className="flex flex-col items-center">
+                                                        <img
+                                                            src={item.dataUrl1x1}
+                                                            alt={`${item.originalFileName} (1:1)`}
+                                                            className="w-32 h-32 object-cover rounded-md shadow-sm border border-gray-300 mb-2"
+                                                        />
+                                                        <p className="text-sm text-gray-600 mb-2">1:1 Format</p>
+                                                        <button
+                                                            onClick={() => downloadImage(item.dataUrl1x1, getFormattedFileName(item.originalFileName, '1x1'))}
+                                                            className="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-4 rounded-full shadow-sm transition duration-200"
+                                                        >
+                                                            Herunterladen (1:1)
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {croppedImages.length > 0 && (
+                            <div className="text-center mt-8">
+                                <button
+                                    onClick={downloadAllImages}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+                                >
+                                    Alle Bilder herunterladen (.zip)
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </main>
+
+            <footer className="w-full max-w-4xl text-center text-gray-500 text-sm mt-8">
+                <p>&copy; 2025 Bildzuschnitt-App. Alle Rechte vorbehalten.</p>
+            </footer>
+        </div>
+    );
+};
+
+export default App;
