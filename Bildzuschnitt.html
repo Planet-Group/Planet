@@ -3,27 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bildzuschnitt-App</title>
+    <title>Insta-Crop Pro | Drag & Drop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        
+        /* Animation für die Drop-Zone */
+        .drop-zone {
+            transition: all 0.2s ease-in-out;
+        }
+        .drop-zone-active {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen">
+<body class="bg-slate-50 min-h-screen">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useRef } = React;
+        const { useState, useRef, useEffect } = React;
 
         const App = () => {
             const [selectedFiles, setSelectedFiles] = useState([]);
             const [croppedImages, setCroppedImages] = useState([]);
             const [isLoading, setIsLoading] = useState(false);
+            const [isDragging, setIsDragging] = useState(false);
             const fileInputRef = useRef(null);
 
             const getFormattedFileName = (originalName, format) => {
@@ -31,22 +43,34 @@
                 return `${name}_${format}.jpg`;
             };
 
-            const handleFileChange = (event) => {
-                const files = Array.from(event.target.files).filter(file =>
+            const addFiles = (files) => {
+                const validFiles = Array.from(files).filter(file =>
                     file.type === 'image/jpeg' || file.type === 'image/png'
                 );
-                setSelectedFiles(prevFiles => [...prevFiles, ...files]);
+                setSelectedFiles(prev => [...prev, ...validFiles]);
             };
 
-            const handleUploadClick = () => fileInputRef.current.click();
+            // Drag & Drop Event Handler
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setIsDragging(true);
+            };
 
-            const removeFile = (indexToRemove) => {
-                setSelectedFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove));
-                setCroppedImages([]);
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    addFiles(e.dataTransfer.files);
+                }
             };
 
             const processInitialWidth = (image, maxWidth) => {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                     const originalWidth = image.naturalWidth;
                     const originalHeight = image.naturalHeight;
                     if (originalWidth <= maxWidth) return resolve(image);
@@ -113,7 +137,7 @@
                             dataUrl1x1: cropped1x1
                         });
                     } catch (e) {
-                        processed.push({ originalFileName: file.name, error: "Fehler beim Verarbeiten." });
+                        console.error(e);
                     } finally {
                         if (imageUrl) URL.revokeObjectURL(imageUrl);
                     }
@@ -132,57 +156,123 @@
             const downloadAllImages = async () => {
                 const zip = new JSZip();
                 croppedImages.forEach(item => {
-                    if (item.dataUrl9x16) zip.file(getFormattedFileName(item.originalFileName, '9x16'), item.dataUrl9x16.split(',')[1], { base64: true });
-                    if (item.dataUrl4x5) zip.file(getFormattedFileName(item.originalFileName, '4x5'), item.dataUrl4x5.split(',')[1], { base64: true });
-                    if (item.dataUrl1x1) zip.file(getFormattedFileName(item.originalFileName, '1x1'), item.dataUrl1x1.split(',')[1], { base64: true });
+                    ['9x16', '4x5', '1x1'].forEach(fmt => {
+                        const key = `dataUrl${fmt}`;
+                        if (item[key]) zip.file(getFormattedFileName(item.originalFileName, fmt), item[key].split(',')[1], { base64: true });
+                    });
                 });
                 const content = await zip.generateAsync({ type: "blob" });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
-                link.download = "zugeschnittene_bilder.zip";
+                link.download = "social_media_crops.zip";
                 link.click();
             };
 
             return (
-                <div className="p-4 flex flex-col items-center">
-                    <header className="w-full max-w-4xl text-center mb-8">
-                        <h1 className="text-4xl font-bold text-indigo-700 mb-2 p-2 bg-white rounded-lg shadow-md">Bildzuschnitt-App</h1>
-                        <p className="text-gray-600">9:16, 4:5 und 1:1 Formate (max. 1080px Breite)</p>
+                <div className="max-w-5xl mx-auto py-12 px-4">
+                    <header className="text-center mb-12">
+                        <h1 className="text-5xl font-extrabold text-slate-900 tracking-tight mb-3">Insta-Crop <span className="text-indigo-600">Pro</span></h1>
+                        <p className="text-slate-500 text-lg">Perfekter Zuschnitt für deine Social Media Posts.</p>
                     </header>
 
-                    <main className="w-full max-w-4xl bg-white p-8 rounded-xl shadow-lg">
-                        <div className="flex flex-col items-center mb-6">
-                            <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" ref={fileInputRef} />
-                            <button onClick={handleUploadClick} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-full transition transform hover:scale-105">Bilder auswählen</button>
-                            {selectedFiles.length > 0 && <p className="mt-4 text-gray-700">{selectedFiles.length} Bild(er) bereit.</p>}
+                    <main className="space-y-8">
+                        {/* Grafische Drop-Zone */}
+                        <div 
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onClick={() => fileInputRef.current.click()}
+                            className={`drop-zone relative border-4 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center cursor-pointer 
+                                ${isDragging ? 'drop-zone-active' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50'}`}
+                        >
+                            <input type="file" multiple accept="image/*" onChange={(e) => addFiles(e.target.files)} className="hidden" ref={fileInputRef} />
+                            
+                            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isDragging ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">
+                                {isDragging ? 'Bilder jetzt loslassen' : 'Bilder hierher ziehen'}
+                            </h2>
+                            <p className="text-slate-500 text-center max-w-xs">
+                                oder <span className="text-indigo-600 font-semibold underline">vom Computer wählen</span>. Unterstützt JPG und PNG.
+                            </p>
                         </div>
 
                         {selectedFiles.length > 0 && (
-                            <div className="text-center mt-6 border-t pt-6">
-                                <button onClick={processImages} disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full disabled:opacity-50">
-                                    {isLoading ? 'Verarbeite...' : 'Bilder jetzt zuschneiden'}
+                            <section className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-slate-800">Warteschlange ({selectedFiles.length})</h3>
+                                    <button onClick={() => setSelectedFiles([])} className="text-sm font-semibold text-red-500 hover:text-red-600">Liste leeren</button>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                    {selectedFiles.map((f, i) => (
+                                        <div key={i} className="bg-slate-50 rounded-xl p-3 border border-slate-100 relative group">
+                                            <p className="text-xs font-medium text-slate-600 truncate">{f.name}</p>
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); setSelectedFiles(prev => prev.filter((_, idx) => idx !== i)); }}
+                                                className="absolute -top-2 -right-2 bg-white shadow-md text-slate-400 hover:text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-lg"
+                                            >×</button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button 
+                                    onClick={processImages} 
+                                    disabled={isLoading}
+                                    className="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-extrabold py-5 rounded-2xl transition shadow-lg shadow-indigo-100 disabled:opacity-50"
+                                >
+                                    {isLoading ? 'Verarbeitung läuft...' : 'JETZT ZUSCHNEIDEN'}
                                 </button>
-                            </div>
+                            </section>
                         )}
 
                         {croppedImages.length > 0 && (
-                            <div className="mt-12 flex flex-col gap-8">
+                            <section className="space-y-12 pb-20">
+                                <div className="text-center">
+                                    <h2 className="text-3xl font-extrabold text-slate-900">Fertige Ergebnisse</h2>
+                                    <p className="text-slate-500 mt-2">Die Breite wurde auf maximal 1080px optimiert.</p>
+                                </div>
+
                                 {croppedImages.map((item, idx) => (
-                                    <div key={idx} className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                                        <p className="font-bold text-lg mb-4 text-center">{item.originalFileName}</p>
-                                        <div className="flex flex-col sm:flex-row justify-around items-center gap-6">
+                                    <div key={idx} className="bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 border border-slate-50">
+                                        <div className="flex items-center mb-8">
+                                            <span className="bg-slate-900 text-white w-8 h-8 rounded-xl flex items-center justify-center font-bold mr-4">{idx + 1}</span>
+                                            <h4 className="text-xl font-bold text-slate-800 truncate">{item.originalFileName}</h4>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                                             {['9x16', '4x5', '1x1'].map(fmt => (
-                                                <div key={fmt} className="flex flex-col items-center">
-                                                    <img src={item[`dataUrl${fmt}`]} className="shadow-md border rounded mb-2 max-h-48" />
-                                                    <span className="text-xs text-gray-500 mb-2">{fmt} Format</span>
-                                                    <button onClick={() => downloadImage(item[`dataUrl${fmt}`], getFormattedFileName(item.originalFileName, fmt))} className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-200">Download</button>
+                                                <div key={fmt} className="flex flex-col">
+                                                    <div className="bg-slate-100 rounded-2xl overflow-hidden mb-4 border border-slate-100 flex items-center justify-center overflow-hidden" 
+                                                         style={{aspectRatio: fmt === '1x1' ? '1/1' : (fmt === '4x5' ? '4/5' : '9/16'), maxHeight: '400px'}}>
+                                                        <img src={item[`dataUrl${fmt}`]} className="w-full h-full object-cover" alt={fmt} />
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-black text-slate-400 tracking-tighter">{fmt}</span>
+                                                        <button 
+                                                            onClick={() => downloadImage(item[`dataUrl${fmt}`], getFormattedFileName(item.originalFileName, fmt))}
+                                                            className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition"
+                                                        >DOWNLOAD</button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 ))}
-                                <button onClick={downloadAllImages} className="bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition">Alle als ZIP herunterladen</button>
-                            </div>
+
+                                <div className="sticky bottom-8 flex justify-center px-4">
+                                    <button 
+                                        onClick={downloadAllImages} 
+                                        className="bg-slate-900 text-white text-xl font-bold py-6 px-12 rounded-3xl shadow-2xl hover:bg-slate-800 transition transform hover:-translate-y-1 w-full max-w-xl"
+                                    >
+                                        ALLE BILDER ALS ZIP (SAMMEL-DOWNLOAD)
+                                    </button>
+                                </div>
+                            </section>
                         )}
                     </main>
                 </div>
