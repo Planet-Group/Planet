@@ -1,0 +1,135 @@
+/* ============================================================
+   TEMP.CSS — Erweiterungen für spezifische Apps
+   Styles, die noch nicht in planet.css sind.
+   Später in planet.css überführen oder als App-spezifisch belassen.
+============================================================ */
+
+/* ============================================================
+   ORG CHART
+============================================================ */
+
+/* Canvas — füllt Fenster unterhalb der Nav */
+.oc-canvas {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--planet-white);
+  overflow: hidden;
+}
+.oc-canvas svg {
+  display: block;
+  width: 100%; height: 100%;
+  cursor: grab;
+}
+.oc-canvas svg:active { cursor: grabbing; }
+
+/* Search — lebt jetzt im Nav-Inner */
+.oc-search { width: 240px; }
+
+/* Info Panel */
+.info-panel {
+  position: fixed;
+  right: 0; bottom: 0;
+  width: 320px;
+  background: var(--planet-white);
+  border-left: 1px solid var(--planet-tint);
+  padding: var(--space-5);
+  transform: translateX(100%);
+  transition: transform var(--motion-default) var(--ease-out);
+  z-index: 50;
+  overflow-y: auto;
+}
+.info-panel.is-open { transform: translateX(0); }
+
+.ip-close {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: var(--space-5);
+  height: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+.ip-close:hover { opacity: 1; }
+.ip-close .material-icons-outlined { font-size: 20px; }
+
+.ip-logo {
+  width: var(--space-8);
+  height: var(--space-8);
+  background: var(--planet-tint);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--planet-font);
+  font-weight: var(--weight-display);
+  font-size: var(--text-h4);
+  flex: none;
+}
+
+/* ============================================================
+   TREE CARDS (orgchart-tree.html)
+============================================================ */
+
+.tc-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: 100%;
+  background: var(--planet-white);
+  border: 1px solid var(--planet-tint);
+  border-radius: var(--radius-card);
+  padding: 0 var(--space-3);
+  box-sizing: border-box;
+  cursor: pointer;
+  font-family: var(--planet-font);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  overflow: hidden;
+}
+.tc-card:hover { border-color: var(--planet-black); }
+.tc-card.is-selected {
+  border-color: var(--planet-primary);
+  box-shadow: 0 0 0 2px var(--planet-primary);
+}
+
+.tc-av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--planet-font);
+  font-weight: var(--weight-display);
+  font-size: var(--text-small);
+  flex-shrink: 0;
+}
+
+.tc-bd { overflow: hidden; min-width: 0; }
+
+.tc-nm {
+  font-family: var(--planet-font);
+  font-weight: var(--weight-display);
+  font-size: var(--text-small);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--planet-black);
+  line-height: 1.2;
+}
+
+.tc-sb {
+  font-family: var(--planet-font);
+  font-size: 11px;
+  opacity: 0.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--planet-black);
+  margin-top: 2px;
+}

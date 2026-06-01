@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planet Group — Organigramm</title>
+<link rel="stylesheet" href="https://use.typekit.net/phj5hyp.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link rel="stylesheet" href="planet.css">
+<link rel="stylesheet" href="temp.css">
+</head>
+<body>
+
+<style>
+/* ── Dark Mode ─────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --planet-black:      #FFFFFF;
+  --planet-white:      #0F0F0F;
+  --planet-tint:       #2A2A2A;
+  --planet-input-fill: #1A1A1A;
+  --planet-neutral:    #161616;
+}
+
+/* ── Floating Logo + Search ────────────────────────────────── */
+.oc-logo        { position:fixed; top:var(--space-4); left:var(--space-4); z-index:20; text-decoration:none; }
+/* .oc-search-float aufgelöst, lebt jetzt in .oc-topbar */
+#oc-canvas path { transition: opacity 280ms ease; }
+.oc-name { transition: opacity 280ms ease; }
+.oc-name:hover { opacity: 0.6; }
+.oc-abbr, .oc-dot { transition: opacity 280ms ease; }
+.oc-bg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 150ms ease, fill 280ms ease;
+}
+.oc-bg:hover { transform: scale(1.08); }
+
+/* ── Top-right cluster: Suche + Buttons ────────────────────── */
+.oc-topbar {
+  position:fixed; top:var(--space-4); right:var(--space-4);
+  display:flex; align-items:center; gap:var(--space-2);
+  z-index:60; /* über info-panel (z:50) */
+}
+.oc-ctrl-btn {
+  all:unset; cursor:pointer;
+  width:var(--space-7); height:var(--space-7);
+  background:var(--planet-white); border:1px solid var(--planet-tint);
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  transition: border-color var(--motion-fast) var(--ease-out);
+}
+.oc-ctrl-btn:hover { border-color:var(--planet-black); }
+.oc-ctrl-btn .material-icons-outlined { font-size:20px; color:var(--planet-black); }
+
+/* ── Mobile Drill-Down ─────────────────────────────────────── */
+.oc-mobile { display:none; }
+
+@media (max-width:768px) {
+  .oc-canvas, .oc-logo, .oc-topbar, .info-panel { display:none !important; }
+  .oc-mobile {
+    display:flex; flex-direction:column;
+    position:fixed; inset:0;
+    background:var(--planet-white);
+  }
+}
+
+.oc-m-header {
+  display:flex; align-items:center; gap:var(--space-3);
+  padding:var(--space-4) var(--space-4) var(--space-3);
+  border-bottom:1px solid var(--planet-tint);
+  flex-shrink:0;
+}
+.oc-m-back {
+  all:unset; cursor:pointer; display:flex;
+  align-items:center; justify-content:center;
+  opacity:.5; transition:opacity var(--motion-fast) var(--ease-out);
+}
+.oc-m-back:hover  { opacity:1; }
+.oc-m-back[hidden]{ display:none; }
+.oc-m-back .material-icons-outlined { font-size:22px; color:var(--planet-black); }
+.oc-m-title {
+  font-family:var(--planet-font); font-weight:var(--weight-display);
+  font-size:var(--text-h4); color:var(--planet-black);
+}
+.oc-m-theme {
+  all:unset; cursor:pointer; margin-left:auto;
+  display:flex; align-items:center; justify-content:center; opacity:.5;
+  transition:opacity var(--motion-fast) var(--ease-out);
+}
+.oc-m-theme:hover { opacity:1; }
+.oc-m-theme .material-icons-outlined { font-size:22px; color:var(--planet-black); }
+
+.oc-m-list { flex:1; overflow-y:auto; padding:var(--space-2) 0; }
+
+.oc-m-item {
+  display:flex; align-items:center; gap:var(--space-3);
+  padding:var(--space-3) var(--space-4);
+  transition:background var(--motion-fast) var(--ease-out);
+}
+.oc-m-item.is-clickable { cursor:pointer; }
+.oc-m-item.is-clickable:hover { background:var(--planet-neutral); }
+
+.oc-m-av {
+  width:var(--space-7); height:var(--space-7); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-family:var(--planet-font); font-weight:var(--weight-display); font-size:12px;
+}
+.oc-m-body  { flex:1; min-width:0; }
+.oc-m-name  { font-family:var(--planet-font); font-weight:var(--weight-display); font-size:var(--text-small); color:var(--planet-black); }
+.oc-m-sub   { font-size:11px; opacity:.45; color:var(--planet-black); }
+.oc-m-chevron { opacity:.25; flex-shrink:0; font-size:20px !important; color:var(--planet-black); }
+</style>
+
+<a class="logo oc-logo" href="styleguide.html">Planet</a>
+
+<div class="oc-topbar">
+  <input id="oc-search" type="text" class="input oc-search" placeholder="Suchen…" autocomplete="off">
+  <button class="oc-ctrl-btn" id="oc-theme" title="Nachtmodus">
+    <span class="material-icons-outlined">dark_mode</span>
+  </button>
+  <button class="oc-ctrl-btn" id="oc-fit" title="Auf Bildschirmgröße anpassen">
+    <span class="material-icons-outlined">fit_screen</span>
+  </button>
+  <button class="oc-ctrl-btn" id="oc-fullscreen" title="Vollbild">
+    <span class="material-icons-outlined">fullscreen</span>
+  </button>
+</div>
+
+<div id="oc-canvas"></div>
+
+<!-- Mobile Drill-Down -->
+<div class="oc-mobile" id="oc-mobile">
+  <div class="oc-m-header">
+    <button class="oc-m-back" id="oc-m-back" hidden>
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    <a class="logo" href="styleguide.html" id="oc-m-title" style="text-decoration:none;">Planet</a>
+    <button class="oc-m-theme" id="oc-m-theme" title="Nachtmodus">
+      <span class="material-icons-outlined">dark_mode</span>
+    </button>
+  </div>
+  <div class="oc-m-list" id="oc-m-list"></div>
+</div>
+
+<aside class="info-panel" id="ip">
+  <button class="ip-close" id="ip-close" aria-label="Schließen">
+    <span class="material-icons-outlined">close</span>
+  </button>
+  <div style="margin-top: var(--space-8);" class="flow">
+    <span class="meta meta--strong" id="ip-badge"></span>
+    <h3 id="ip-title"></h3>
+    <p class="meta" id="ip-desc"></p>
+    <div id="ip-meta" class="flow"></div>
+    <a id="ip-link" href="#" target="_blank" rel="noopener" class="btn btn--secondary" style="display:none; align-self:flex-start;">Website ↗</a>
+  </div>
+</aside>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="orgdata.js"></script>
+<script>
+// ============================================================
+//  DATA  —  aus orgdata.js (funktioniert auch mit file://)
+// ============================================================
+(function(ORG) {
+
+// ============================================================
+//  CONFIG
+// ============================================================
+const NODE_R = d => ({ holding:44, company:30, area:24, department:18, team:13, employee:9 })[d.data.type] || 9;
+
+// Farben abhängig vom aktiven Theme
+function isDark() { return document.documentElement.dataset.theme === 'dark'; }
+
+function getNodeFill(type) {
+  const d = isDark();
+  return {
+    holding:    '#0000FF',
+    company:    d ? '#FFFFFF' : '#000000',
+    area:       d ? '#B0B0B0' : '#3C3C3C',
+    department: '#888888',
+    team:       d ? '#383838' : '#C8C8C8',
+    employee:   d ? '#1C1C1C' : '#EFEFEF',
+  }[type] || (d ? '#383838' : '#C8C8C8');
+}
+
+function getTextFill(type) {
+  const d = isDark();
+  return {
+    holding:    '#ffffff',
+    company:    d ? '#000000' : '#ffffff',
+    area:       '#ffffff',
+    department: '#ffffff',
+    team:       d ? '#ffffff' : '#000000',
+    employee:   d ? '#ffffff' : '#000000',
+  }[type] || (d ? '#fff' : '#000');
+}
+const TYPE_LABEL = {
+  holding:    'Holding',
+  company:    'Tochtergesellschaft',
+  area:       'Bereich',
+  department: 'Abteilung',
+  team:       'Team',
+  person:     'Person',
+  employee:   'Mitarbeiter',
+};
+
+// ============================================================
+//  DOM + SVG SETUP
+// ============================================================
+const W = window.innerWidth;
+const H = window.innerHeight;
+const PANEL_W = 320;
+
+const svg = d3.select('#oc-canvas').append('svg')
+  .attr('width', W).attr('height', H);
+
+const rootG = svg.append('g');
+
+const zoom = d3.zoom()
+  .scaleExtent([0.15, 4])
+  .on('zoom', e => rootG.attr('transform', e.transform));
+
+svg.call(zoom)
+   .call(zoom.transform, d3.zoomIdentity.translate(W / 2, H / 2));
+
+// Disable double-click zoom — we handle clicks ourselves
+svg.on('dblclick.zoom', null);
+
+
+const gLinks    = rootG.append('g'); // Ebene 1: Verbindungslinien
+const gNodesLow = rootG.append('g'); // Ebene 2: inaktive Kreise (unter Labels)
+const gLabels   = rootG.append('g'); // Ebene 3: Beschriftungen
+const gNodes    = rootG.append('g'); // Ebene 4: aktive Kreise (über Labels)
+
+// ============================================================
+//  TREE LAYOUT
+// ============================================================
+// Feste Radien pro Tiefenebene — skalieren mit dem Viewport,
+// damit der Baum beim Aufklappen neuer Ebenen nicht schrumpft.
+const MAX_R  = Math.min(W, H) * 0.6;
+const LEVEL_R = [0, 0.22, 0.42, 0.58, 0.73, 0.87, 1.0].map(f => f * MAX_R);
+
+const layout = d3.tree()
+  .size([2 * Math.PI, 1]) // y wird unten manuell gesetzt
+  .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth);
+
+// ============================================================
+//  ROOT + INITIAL COLLAPSE
+// ============================================================
+const root = d3.hierarchy(ORG);
+root.x0 = 0; root.y0 = 0;
+
+// Rekursiver Collapse: versteckt einen Knoten UND alle seine Nachkommen
+function collapseAll(d) {
+  if (d.children) {
+    d._children = d.children;
+    d._children.forEach(collapseAll); // Nachkommen ebenfalls kollabieren
+    d.children = null;
+  }
+}
+// Anfangszustand: nur Planet GmbH + 4 Companies sichtbar
+root.children.forEach(collapseAll);
+
+let selected = null;
+let focused  = null; // aktiver Strang: dieser Node + Vorfahren + direkte Kinder
+
+function isInActiveStrand(d) {
+  if (!focused) return true;
+  if (d === focused) return true;
+  // Vorfahren von focused
+  let anc = focused.parent;
+  while (anc) { if (anc === d) return true; anc = anc.parent; }
+  // Direkte Kinder von focused
+  if (d.parent === focused) return true;
+  return false;
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+
+// Erbt Farbe von Operations (oder anderem farbigen Vorfahren)
+function inheritedColor(d) {
+  let node = d;
+  while (node) {
+    if (node.data.color) return { bg: node.data.color, fg: node.data.textColor || '#000' };
+    node = node.parent;
+  }
+  return null;
+}
+
+function rPt(angle, r) {
+  return [
+    r * Math.cos(angle - Math.PI / 2),
+    r * Math.sin(angle - Math.PI / 2),
+  ];
+}
+
+function bezierPath([sx, sy], [tx, ty]) {
+  const my = (sy + ty) / 2;
+  return `M${sx},${sy}C${sx},${my} ${tx},${my} ${tx},${ty}`;
+}
+
+function labelAnchor(d) {
+  if (d.depth === 0) return 'middle';
+  const c = Math.cos(d.x - Math.PI / 2);
+  return Math.abs(c) < 0.12 ? 'middle' : c > 0 ? 'start' : 'end';
+}
+
+function labelDx(d) {
+  if (d.depth === 0) return 0;
+  const r = NODE_R(d), c = Math.cos(d.x - Math.PI / 2);
+  return Math.abs(c) < 0.12 ? 0 : (c > 0 ? r + 9 : -(r + 9));
+}
+
+function labelDy(d) {
+  if (d.depth === 0) return 0;
+  const r = NODE_R(d), c = Math.cos(d.x - Math.PI / 2);
+  if (Math.abs(c) < 0.12)
+    return Math.sin(d.x - Math.PI / 2) > 0 ? r + 17 : -(r + 7);
+  return 4;
+}
+
+// ============================================================
+//  UPDATE
+// ============================================================
+function update(src) {
+  layout(root);
+  // Feste Radien pro Ebene zuweisen — überschreibt d3.tree() y-Skalierung
+  root.each(d => { d.y = LEVEL_R[Math.min(d.depth, LEVEL_R.length - 1)]; });
+  const DUR = 380;
+  const [px0, py0] = rPt(src.x0 ?? 0, src.y0 ?? 0);
+
+  // ── Links ──────────────────────────────────────────────────
+  const links = gLinks.selectAll('path')
+    .data(root.links(), d => d.target.data.id);
+
+  links.enter().append('path')
+    .attr('fill', 'none')
+    .style('stroke', 'var(--planet-tint)')
+    .attr('stroke-width', 1.5)
+    .attr('d', () => bezierPath([px0, py0], [px0, py0]))
+    .merge(links)
+    .transition().duration(DUR)
+    .attr('d', d => bezierPath(
+      rPt(d.source.x, d.source.y),
+      rPt(d.target.x, d.target.y)
+    ));
+
+  links.exit().transition().duration(DUR)
+    .attr('d', () => bezierPath([px0, py0], [px0, py0]))
+    .remove();
+
+  // Aktiver Strang: Links inaktiver Äste dimmen (CSS-Transition)
+  gLinks.selectAll('path')
+    .style('opacity', d => isInActiveStrand(d.target) ? 1 : 0.18);
+
+  // ── Labels (gLabels — unter allen Kreisen) ─────────────────
+  const labels = gLabels.selectAll('text.oc-name')
+    .data(root.descendants(), d => d.data.id);
+
+  labels.enter().append('text').attr('class', 'oc-name')
+    .style('cursor', 'pointer')
+    .style('user-select', 'none')
+    .on('click', (e, d) => { e.stopPropagation(); openPanelOnName(d); })
+    .attr('transform', `translate(${px0},${py0})`)
+    .merge(labels)
+    .transition().duration(DUR)
+    .attr('transform', d => { const [x, y] = rPt(d.x, d.y); return `translate(${x},${y})`; });
+
+  gLabels.selectAll('text.oc-name')
+    .attr('fill', () => isDark() ? '#ffffff' : '#000000')
+    .attr('text-anchor', d => labelAnchor(d))
+    .attr('dx', d => labelDx(d))
+    .attr('dy', d => labelDy(d))
+    .style('font-family', 'var(--planet-font)')
+    .style('font-size', d => d.depth <= 1 ? '13px' : '11px')
+    .style('font-weight', d => d.depth <= 1 ? '600' : '500')
+    .style('opacity', d => isInActiveStrand(d) ? null : 0.15)
+    .text(d => d.depth === 0 ? '' : d.data.name);
+
+  labels.exit().transition().duration(DUR)
+    .attr('transform', `translate(${px0},${py0})`).remove();
+
+  // ── Nodes (Data-Join über rootG — findet Nodes in gNodes + gNodesLow)
+  const nodes = rootG.selectAll('g.oc-node')
+    .data(root.descendants(), d => d.data.id);
+
+  const nEnter = nodes.enter().append(function(d) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    gNodes.node().appendChild(g); // initial in gNodes, wird unten verschoben
+    return g;
+  })
+    .attr('class', d => `oc-node oc-node--${d.data.type}`)
+    .attr('transform', `translate(${px0},${py0})`);
+
+  nEnter.append('circle').attr('class', 'oc-bg').attr('r', 0)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => { e.stopPropagation(); expandCollapse(d); });
+
+  nEnter.append('text').attr('class', 'oc-abbr')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'central')
+    .attr('pointer-events', 'none')
+    .style('user-select', 'none');
+
+  nEnter.append('circle').attr('class', 'oc-dot')
+    .attr('r', 4).attr('fill', '#0000FF')
+    .attr('pointer-events', 'none');
+
+  const nAll = nEnter.merge(nodes);
+
+  nAll.transition().duration(DUR)
+    .attr('transform', d => { const [x, y] = rPt(d.x, d.y); return `translate(${x},${y})`; });
+
+  nAll.select('.oc-bg')
+    .style('fill', d => {
+      if (!isInActiveStrand(d)) return isDark() ? '#1E1E1E' : '#D8D8D8';
+      const inh = inheritedColor(d);
+      return inh ? inh.bg : getNodeFill(d.data.type);
+    })
+    .attr('stroke', 'none').attr('stroke-width', 0)
+    .transition().duration(DUR)
+    .attr('r', d => NODE_R(d));
+
+  nAll.select('.oc-abbr')
+    .attr('fill', d => { const inh = inheritedColor(d); return inh ? inh.fg : getTextFill(d.data.type); })
+    .style('font-family', 'var(--planet-font)')
+    .style('font-weight', '600')
+    .style('font-size', d => `${Math.max(9, NODE_R(d) * 0.46)}px`)
+    .style('opacity', d => isInActiveStrand(d) ? null : 0.25)
+    .text(d => d.data.short || d.data.name.slice(0, 3).toUpperCase());
+
+  nAll.select('.oc-dot')
+    .attr('cx', d =>  NODE_R(d) * 0.7)
+    .attr('cy', d => -NODE_R(d) * 0.7)
+    .style('display', d => d._children ? null : 'none')
+    .style('opacity', d => isInActiveStrand(d) ? null : 0);
+
+  nodes.exit().transition().duration(DUR)
+    .attr('transform', `translate(${px0},${py0})`).remove();
+
+  root.each(d => { d.x0 = d.x; d.y0 = d.y; });
+
+  // Nodes in richtige Ebene verschieben:
+  // inaktiv → gNodesLow (unter Labels), aktiv → gNodes (über Labels)
+  // Sortierung: tiefere Nodes zuerst → flachere immer vorne
+  const byDepthDesc = (a, b) => b.__data__.depth - a.__data__.depth;
+  const inactive = [], active = [];
+  rootG.selectAll('g.oc-node').each(function(d) {
+    (isInActiveStrand(d) ? active : inactive).push(this);
+  });
+  inactive.sort(byDepthDesc).forEach(el => gNodesLow.node().appendChild(el));
+  active.sort(byDepthDesc).forEach(el => gNodes.node().appendChild(el));
+}
+
+// ============================================================
+//  ZOOM TO FIT — ausgewählter Node + sichtbare Kinder
+// ============================================================
+let zoomFitTimer = null;
+
+function zoomToFit(d) {
+  const vw       = window.innerWidth;
+  const vh       = window.innerHeight;
+  const panelOpen = document.getElementById('ip').classList.contains('is-open');
+  const availW    = panelOpen ? vw - PANEL_W : vw;
+  const availH    = vh;
+  const screenCx  = panelOpen ? (vw - PANEL_W) / 2 : vw / 2;
+  const screenCy  = availH / 2;
+
+  // Alle sichtbaren Nodes (Node + Nachkommen) sammeln
+  const pts = [];
+  (function collect(node) {
+    pts.push(rPt(node.x, node.y));
+    if (node.children) node.children.forEach(collect);
+  }(d));
+
+  const PAD  = 70;
+  const xs   = pts.map(p => p[0]);
+  const ys   = pts.map(p => p[1]);
+  const minX = Math.min(...xs) - PAD;
+  const maxX = Math.max(...xs) + PAD;
+  const minY = Math.min(...ys) - PAD;
+  const maxY = Math.max(...ys) + PAD;
+  const cx   = (minX + maxX) / 2;
+  const cy   = (minY + maxY) / 2;
+
+  const k = pts.length > 1
+    ? Math.min(availW / (maxX - minX), availH / (maxY - minY), 4)
+    : Math.min(availW, availH) / 260;
+
+  svg.transition().duration(520).call(
+    zoom.transform,
+    d3.zoomIdentity.translate(screenCx - cx * k, screenCy - cy * k).scale(k)
+  );
+}
+
+// ============================================================
+//  EXPAND / COLLAPSE  (Kreis-Klick)
+// ============================================================
+function collapseNode(node) {
+  if (node.children) { node._children = node.children; node.children = null; }
+}
+
+function expandCollapse(d) {
+  let zoomTarget = d;
+
+  // Info-Panel bei jeder Kreis-Aktion schließen
+  selected = null;
+  closePanel();
+
+  if (d.depth === 0) {
+    // Root-Klick: alles rekursiv einklappen + Reset
+    if (d.children) d.children.forEach(collapseAll);
+    focused = null;
+  } else if (d._children) {
+    // Accordion: alle Geschwister einklappen bevor dieses aufgeht
+    if (d.parent && d.parent.children) {
+      d.parent.children.forEach(s => { if (s !== d) collapseNode(s); });
+    }
+    d.children  = d._children;
+    d._children = null;
+    focused     = d;
+  } else if (d.children) {
+    d._children = d.children;
+    d.children  = null;
+    focused     = d.parent || d;
+    zoomTarget  = d.parent || d;
+  }
+
+  update(d);
+  clearTimeout(zoomFitTimer);
+  zoomFitTimer = setTimeout(() => zoomToFit(zoomTarget), 420);
+}
+
+// ============================================================
+//  DRAWER ÖFFNEN  (Name-Klick)
+// ============================================================
+function openPanelOnName(d) {
+  selected = d.data;
+  openPanel(d.data);
+  update(d);
+  clearTimeout(zoomFitTimer);
+  zoomFitTimer = setTimeout(() => zoomToFit(d), 440);
+}
+
+// Click on empty canvas → deselect + close panel
+svg.on('click', () => {
+  clearTimeout(zoomFitTimer);
+  selected = null;
+  focused  = null;
+  closePanel();
+  update(root);
+});
+
+// Fit-to-screen button
+document.getElementById('oc-fit').addEventListener('click', () => {
+  clearTimeout(zoomFitTimer);
+  zoomToFit(root);
+});
+
+// ============================================================
+//  INFO PANEL
+// ============================================================
+function openPanel(data) {
+  const panel = document.getElementById('ip');
+  const wasOpen = panel.classList.contains('is-open');
+  panel.classList.add('is-open');
+
+  // Baum beim ersten Öffnen nach links einrücken
+  if (!wasOpen) {
+    const t = d3.zoomTransform(svg.node());
+    svg.transition().duration(300).call(
+      zoom.transform,
+      d3.zoomIdentity.translate(t.x - PANEL_W / 2, t.y).scale(t.k)
+    );
+  }
+
+  document.getElementById('ip-badge').textContent = TYPE_LABEL[data.type] || data.type;
+  document.getElementById('ip-title').textContent = data.name;
+  document.getElementById('ip-desc').textContent  = data.description || 'Inhalte folgen.';
+
+  const metaEl = document.getElementById('ip-meta');
+  metaEl.innerHTML = '';
+  if (data.role) metaEl.innerHTML += `<p class="meta">${data.role}</p>`;
+
+  const linkEl = document.getElementById('ip-link');
+  if (data.website) {
+    linkEl.href = data.website;
+    linkEl.style.display = 'inline-flex';
+  } else {
+    linkEl.style.display = 'none';
+  }
+}
+
+function closePanel() {
+  const panel = document.getElementById('ip');
+  if (!panel.classList.contains('is-open')) return;
+  panel.classList.remove('is-open');
+
+  // Baum beim Schließen wieder zentrieren
+  const t = d3.zoomTransform(svg.node());
+  svg.transition().duration(300).call(
+    zoom.transform,
+    d3.zoomIdentity.translate(t.x + PANEL_W / 2, t.y).scale(t.k)
+  );
+}
+
+document.getElementById('ip-close').addEventListener('click', e => {
+  e.stopPropagation();
+  selected = null;
+  closePanel();
+  update(root);
+});
+
+// ============================================================
+//  SEARCH
+// ============================================================
+let searchZoomTimer;
+document.getElementById('oc-search').addEventListener('input', function () {
+  const q = this.value.trim().toLowerCase();
+  const matched = [];
+
+  gNodes.selectAll('g.oc-node').each(function (d) {
+    const match  = q.length > 0 && d.data.name.toLowerCase().includes(q);
+    const hidden = q.length > 0 && !match;
+    d3.select(this).style('opacity', hidden ? 0.1 : 1);
+    d3.select(this).select('.oc-bg')
+      .attr('stroke', match ? '#D4FF00' : 'none')
+      .attr('stroke-width', match ? 3.5 : 0);
+    if (match) matched.push(d);
+  });
+
+  clearTimeout(searchZoomTimer);
+  searchZoomTimer = setTimeout(() => {
+    if (matched.length > 0) {
+      // Treffer ins Sichtfeld bringen
+      const pts = matched.map(d => rPt(d.x, d.y));
+      const PAD = 80;
+      const xs  = pts.map(p => p[0]);
+      const ys  = pts.map(p => p[1]);
+      const x0  = Math.min(...xs) - PAD, x1 = Math.max(...xs) + PAD;
+      const y0  = Math.min(...ys) - PAD, y1 = Math.max(...ys) + PAD;
+      const cx  = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      const vw  = window.innerWidth, vh = window.innerHeight;
+      const k   = Math.min(vw / (x1 - x0), vh / (y1 - y0), 4);
+      svg.transition().duration(420).call(
+        zoom.transform,
+        d3.zoomIdentity.translate(vw / 2 - cx * k, vh / 2 - cy * k).scale(k)
+      );
+    } else if (q.length === 0) {
+      zoomToFit(focused || root);
+    }
+  }, 300);
+});
+
+// Clear search on Escape
+document.getElementById('oc-search').addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { this.value = ''; this.dispatchEvent(new Event('input')); }
+});
+
+// ============================================================
+//  DARK MODE  (muss vor update() stehen, damit getNodeFill() korrekte Farben liefert)
+// ============================================================
+function applyTheme(dark, redraw) {
+  document.documentElement.dataset.theme = dark ? 'dark' : '';
+  const icon = dark ? 'light_mode' : 'dark_mode';
+  document.querySelectorAll('#oc-theme .material-icons-outlined, #oc-m-theme .material-icons-outlined')
+    .forEach(el => el.textContent = icon);
+  if (redraw) update(root); // nur beim Benutzer-Toggle neu rendern
+}
+
+function toggleTheme() {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  localStorage.setItem('oc-theme', dark ? 'dark' : 'light');
+  applyTheme(dark, true);
+}
+
+const savedTheme = localStorage.getItem('oc-theme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(savedTheme === 'dark', false); // Theme setzen, kein Redraw
+
+document.getElementById('oc-theme').addEventListener('click', toggleTheme);
+document.getElementById('oc-m-theme').addEventListener('click', toggleTheme);
+
+// ============================================================
+//  INIT  (nach Theme-Init, damit erste Farben korrekt sind)
+// ============================================================
+update(root);
+zoomToFit(root);
+
+// ============================================================
+//  MOBILE DRILL-DOWN
+// ============================================================
+const mobileStack = []; // Navigationspfad
+
+function getInheritedColorRaw(node, visited = new Set()) {
+  // Walks plain data (not D3 hierarchy) — used for mobile view
+  if (visited.has(node.id)) return null;
+  visited.add(node.id);
+  if (node.color) return { bg: node.color, fg: node.textColor || '#000' };
+  return null;
+}
+
+function mobileBg(node, ancestorColor) {
+  if (ancestorColor) return ancestorColor.bg;
+  if (node.color) return node.color;
+  return getNodeFill(node.type);
+}
+function mobileFg(node, ancestorColor) {
+  if (ancestorColor) return ancestorColor.fg;
+  if (node.textColor) return node.textColor;
+  return getTextFill(node.type);
+}
+
+function renderMobile(node, ancestorColor) {
+  const list  = document.getElementById('oc-m-list');
+  const title = document.getElementById('oc-m-title');
+  const back  = document.getElementById('oc-m-back');
+
+  // Root: Planet-Logo, tiefer: Node-Name als Text
+  if (mobileStack.length === 0) {
+    title.innerHTML = '<a class="logo" href="styleguide.html" style="text-decoration:none;">Planet</a>';
+  } else {
+    title.className = 'oc-m-title';
+    title.textContent = node.name;
+  }
+  back.hidden = mobileStack.length === 0;
+
+  const children = node.children || [];
+  list.innerHTML = children.map(child => {
+    // Inherit color from parent Operations branch
+    const inh = ancestorColor || (node.color ? { bg: node.color, fg: node.textColor || '#000' } : null);
+    const bg  = mobileBg(child, inh);
+    const fg  = mobileFg(child, inh);
+    const sub = child.role || child.industry || TYPE_LABEL[child.type] || '';
+    const hasChildren = !!(child.children && child.children.length);
+    return `<div class="oc-m-item${hasChildren ? ' is-clickable' : ''}" data-id="${child.id}">
+      <div class="oc-m-av" style="background:${bg};color:${fg}">
+        ${child.short || child.name.slice(0,2).toUpperCase()}
+      </div>
+      <div class="oc-m-body">
+        <div class="oc-m-name">${child.name}</div>
+        ${sub ? `<div class="oc-m-sub">${sub}</div>` : ''}
+      </div>
+      ${hasChildren ? '<span class="material-icons-outlined oc-m-chevron">chevron_right</span>' : ''}
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.oc-m-item.is-clickable').forEach(item => {
+    item.addEventListener('click', () => {
+      const id    = item.dataset.id;
+      const child = children.find(c => c.id === id);
+      if (!child) return;
+      const inh = ancestorColor || (node.color ? { bg: node.color, fg: node.textColor || '#000' } : null);
+      mobileStack.push({ node, ancestorColor });
+      renderMobile(child, inh || (child.color ? { bg: child.color, fg: child.textColor || '#000' } : null));
+    });
+  });
+}
+
+document.getElementById('oc-m-back').addEventListener('click', () => {
+  if (mobileStack.length > 0) {
+    const { node, ancestorColor } = mobileStack.pop();
+    renderMobile(node, ancestorColor);
+  }
+});
+
+renderMobile(ORG, null);
+
+// ============================================================
+//  RESIZE — Canvas-Größe aktualisieren, Zoom-State bleibt
+// ============================================================
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    svg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+    zoomToFit(focused || root);
+  }, 80);
+});
+
+// ============================================================
+//  FULLSCREEN
+// ============================================================
+const fsBtn  = document.getElementById('oc-fullscreen');
+const fsIcon = fsBtn.querySelector('.material-icons-outlined');
+
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  fsIcon.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
+  // Kurzes Delay — Browser setzt neue Dimensionen erst nach dem Event
+  setTimeout(() => {
+    svg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+    zoomToFit(focused || root);
+  }, 120);
+});
+
+}(ORG_DATA)); // Ende IIFE
+</script>
+</body>
+</html>
