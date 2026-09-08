@@ -643,6 +643,9 @@
   }
 
   /* Nav-Overlay Stagger */
+  .nav-overlay-link {
+    font-size: var(--text-h3);
+  }
   .nav-overlay.is-open .nav-overlay-link {
     animation: nav-link-in 700ms var(--ease-out) both;
   }
@@ -805,6 +808,10 @@
     .nav-overlay-links {
       padding-top: calc(var(--nav-height) + var(--space-3));
       padding-bottom: var(--space-5);
+      gap: var(--space-1);
+    }
+    .nav-overlay-link {
+      font-size: var(--text-h4);
     }
     .pillar-band { padding: var(--space-5) 0; }
     .pillar-row__body h3 { overflow-wrap: break-word; }

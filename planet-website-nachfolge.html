@@ -661,6 +661,9 @@
   }
 
   /* Nav-Overlay Stagger */
+  .nav-overlay-link {
+    font-size: var(--text-h3);
+  }
   .nav-overlay.is-open .nav-overlay-link {
     animation: nav-link-in 700ms var(--ease-out) both;
   }
@@ -823,6 +826,10 @@
     .nav-overlay-links {
       padding-top: calc(var(--nav-height) + var(--space-3));
       padding-bottom: var(--space-5);
+      gap: var(--space-1);
+    }
+    .nav-overlay-link {
+      font-size: var(--text-h4);
     }
     .pillar-band { padding: var(--space-5) 0; }
     .pillar-row__body h3 { overflow-wrap: break-word; }
@@ -2039,6 +2046,11 @@
   .compare__layout.is-visible .compare__row:nth-child(4) .compare__label { transition-delay: 1280ms; }
   .compare__layout.is-visible .compare__row:nth-child(4) .compare__a { transition-delay: 1320ms; }
   .compare__layout.is-visible .compare__row:nth-child(4) .compare__b { transition-delay: 1400ms; }
+  .compare__layout.is-visible .compare__row:nth-child(5) .compare__rule::before,
+  .compare__layout.is-visible .compare__row:nth-child(5) .compare__rule::after { transition-delay: 1480ms; }
+  .compare__layout.is-visible .compare__row:nth-child(5) .compare__label { transition-delay: 1620ms; }
+  .compare__layout.is-visible .compare__row:nth-child(5) .compare__a { transition-delay: 1660ms; }
+  .compare__layout.is-visible .compare__row:nth-child(5) .compare__b { transition-delay: 1740ms; }
   .compare__closing {
     margin: var(--space-7) 0 0;
     max-width: 48ch;
@@ -2054,7 +2066,7 @@
   .compare__layout.is-visible .compare__closing {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    transition-delay: 1480ms;
+    transition-delay: 1820ms;
   }
   @media (min-width: 1100px) {
     .compare__layout {
@@ -3268,7 +3280,7 @@
       <div>
         <h2>
           <span class="de">Du bist Unternehmer</span>
-          <span class="en">You’re a founder</span>
+          <span class="en">You run a company</span>
         </h2>
       </div>
     </div>
@@ -3278,8 +3290,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du hast gegründet.</span>
-          <span class="en">You built this.</span>
+          <span class="de">Du hast ein Unternehmen erfolgreich aufgebaut.</span>
+          <span class="en">You built a company that works.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3287,8 +3299,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du hast ein Team aufgebaut.</span>
-          <span class="en">You built a team around it.</span>
+          <span class="de">Du führst Menschen — seit Jahren.</span>
+          <span class="en">You’ve been leading people for years.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3296,8 +3308,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du willst, dass Name und Idee weiterleben.</span>
-          <span class="en">You want the name and the idea to live on.</span>
+          <span class="de">Du willst, dass Name, Mitarbeiter und Idee weiterleben.</span>
+          <span class="en">You want the name, the people and the idea to live on.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3323,8 +3335,8 @@
     <div class="section-head section-head--bottom section-head--reveal reveal">
       <div>
         <h2>
-          <span class="de">Kein Fonds. Keine Bank. Unternehmer – genau wie du.</span>
-          <span class="en">Not a fund. Not a bank. Founders — like you.</span>
+          <span class="de">Kein Fonds. Keine Bank. Kein Private Equity.</span>
+          <span class="en">Not a fund. Not a bank. Not private equity.</span>
         </h2>
       </div>
     </div>
@@ -3346,12 +3358,8 @@
       </div>
       <div class="stance__body flow reveal-slide-right">
         <p>
-          <span class="de">Vielleicht hast du dein Unternehmen gegründet, weil dir etwas gefehlt hat: ein Produkt, das es für dein Tier so nicht gab. Bei uns war es genauso.</span>
-          <span class="en">Maybe you started the company because something was missing: a product that didn’t exist for your animal. Same for us.</span>
-        </p>
-        <p>
-          <span class="de">Aus dieser Tierliebe ist die Planet Group gewachsen — ein Unternehmen mit einer Mission: Tiere natürlich gesund machen. Und mit einer Haltung: Unternehmen weiterführen, nicht weiterverkaufen. Deins vielleicht auch.</span>
-          <span class="en">Out of that love of animals, Planet Group grew — a company with a mission: keep animals healthy, naturally. And a stance: we keep companies. We don’t flip them. Yours, maybe.</span>
+          <span class="de">Wir sind Unternehmer, die führen — wie du. Die Planet Group hat eine Mission: Tiere gesund machen. Und den Anspruch, Unternehmen weiterzuführen, nicht weiterzuverkaufen. Deins vielleicht auch.</span>
+          <span class="en">We run companies — like you. Planet Group has a mission: keep animals healthy. And a stance: we keep companies. We don’t flip them. Yours, maybe.</span>
         </p>
       </div>
     </div>
@@ -3365,12 +3373,12 @@
     <div class="stance__grid">
       <div class="stance__body flow reveal-slide-left">
         <p>
-          <span class="de">Wenn du mit uns sprichst, sitzt dir deshalb kein Private-Equity-Fonds gegenüber und keine Bank — sondern Unternehmer, denen die Gruppe zu 100&nbsp;% selbst gehört. Niemand, der dein Lebenswerk nach acht Jahren weiterverkaufen muss. Niemand, der nur deine Zahlen sieht und nicht die Tiere dahinter.</span>
-          <span class="en">When you sit down with us, there is no PE fund across the table. No bank. Founders who own the group, 100%. Nobody who has to sell what you built in eight years. Nobody who only sees the numbers and misses the animals.</span>
+          <span class="de">Wenn du mit uns sprichst, sitzt dir kein Investor gegenüber, der dein Unternehmen als Profitmaschine sieht — kein Fonds, keine Bank, kein Private Equity. Sondern Unternehmer, denen die Gruppe zu 100&nbsp;% selbst gehört. Niemand, der nach acht Jahren verkaufen muss. Niemand, der nur die Zahlen sieht und die Menschen und Tiere dahinter nicht.</span>
+          <span class="en">When you sit down with us, there is no investor across the table who treats the company as a profit engine — no fund, no bank, no private equity. People who own the group, 100%. Nobody who has to sell in eight years. Nobody who only sees the numbers and misses the people and the animals.</span>
         </p>
         <p>
-          <span class="de">Wir wollen, dass dein Unternehmen weiterlebt: der Name, das Team, die Idee dahinter. Bei uns bleibt es in der Tiergesundheit — geführt von Menschen, die verstehen, warum du es gegründet hast.</span>
-          <span class="en">We want the company to live on: the name, the team, the idea. With us it stays in animal health — run by people who understand why you started it.</span>
+          <span class="de">Du trägst Verantwortung für das Schicksal deiner Mitarbeiter und ihrer Familien. Natürlich willst du, dass sie in guten Händen sind. Wir kaufen nicht, um auszuschlachten. Bei uns bleiben sie in der Tiergesundheit — geführt von Menschen, die verstehen, was du aufgebaut hast.</span>
+          <span class="en">You carry the fate of your people, and their families. Of course you want them in good hands. We don’t buy to strip a company down. With us they stay in animal health — run by people who understand what you built.</span>
         </p>
       </div>
       <div class="stance__media reveal-scale">
@@ -3417,11 +3425,20 @@
       </div>
       <div class="compare__rule compare__rule--span">
         <span class="compare__rule-slot">
-          <span class="compare__label"><span class="de">Haltedauer</span><span class="en">Holding period</span></span>
+          <span class="compare__label"><span class="de">Haltung</span><span class="en">Stance</span></span>
         </span>
       </div>
       <div class="compare__rows">
         <div class="compare__row">
+          <div class="compare__cells">
+            <span class="compare__a"><span class="de">Rendite- und gewinnorientiert</span><span class="en">Return and profit first</span></span>
+            <span class="compare__b"><span class="de">Wohl der Menschen und Tiere im Fokus</span><span class="en">People and animals first</span></span>
+          </div>
+        </div>
+        <div class="compare__row">
+          <div class="compare__rule">
+            <span class="compare__label"><span class="de">Haltedauer</span><span class="en">Holding period</span></span>
+          </div>
           <div class="compare__cells">
             <span class="compare__a"><span class="de">Exit nach 5–8 Jahren</span><span class="en">Exit after 5–8 years</span></span>
             <span class="compare__b"><span class="de">Kein Exit-Datum</span><span class="en">No exit date</span></span>
@@ -3432,8 +3449,8 @@
             <span class="compare__label"><span class="de">Maßstab & Werte</span><span class="en">What counts</span></span>
           </div>
           <div class="compare__cells">
-            <span class="compare__a"><span class="de">Rendite zum Zeitpunkt des Verkaufs</span><span class="en">Return at sale</span></span>
-            <span class="compare__b"><span class="de">Marke, Team und Tiere</span><span class="en">Brand, team and animals</span></span>
+            <span class="compare__a"><span class="de">Rendite zum Exit</span><span class="en">Return at exit</span></span>
+            <span class="compare__b"><span class="de">Mitarbeiter, Familien, Tiere</span><span class="en">People, families, animals</span></span>
           </div>
         </div>
         <div class="compare__row">
@@ -3442,7 +3459,7 @@
           </div>
           <div class="compare__cells">
             <span class="compare__a"><span class="de">Effizienz und Optimierung der Kosten</span><span class="en">Cut costs. Squeeze the rest.</span></span>
-            <span class="compare__b"><span class="de">Name, Team und Kultur bleiben</span><span class="en">The name, the team, the culture stay</span></span>
+            <span class="compare__b"><span class="de">Name, Mitarbeiter und Kultur bleiben</span><span class="en">The name, the people, the culture stay</span></span>
           </div>
         </div>
         <div class="compare__row">
@@ -3456,8 +3473,8 @@
         </div>
       </div>
       <p class="compare__closing">
-        <span class="de">Dein Lebenswerk verdient eine Zukunft. Nicht bei einem Finanzinvestor. Sondern mit Unternehmern, die weiterführen statt weiterverkaufen.</span>
-        <span class="en">What you built deserves a future. Not parked with a financial investor. With founders who keep the company — instead of looking for the next buyer.</span>
+        <span class="de">Dein Unternehmen verdient eine Zukunft. Nicht bei einem Finanzinvestor. Sondern mit Unternehmern, die weiterführen statt weiterverkaufen.</span>
+        <span class="en">Your company deserves a future. Not parked with a financial investor. With people who keep running it — instead of looking for the next buyer.</span>
       </p>
     </div>
   </div>
@@ -3500,12 +3517,12 @@
     <div class="stance__grid">
       <div class="mission__body flow reveal-slide-left">
         <p>
-          <span class="de">Gemeinsam verbessern wir das Leben von Tieren — mit starken Marken, innovativen Produkten und echtem Engagement. Auch wenn du übergibst: die Marke bleibt in der Tiergesundheit, in einer <a class="fit__mark" href="#unternehmensziel">Mission<span class="material-symbols-outlined fit__mark-arrow" aria-hidden="true">arrow_outward</span></a>.</span>
-          <span class="en">We make animals’ lives better — with strong brands, products that work, and real commitment. Even after you hand it over, the brand stays in animal health, inside a <a class="fit__mark" href="#unternehmensziel">mission<span class="material-symbols-outlined fit__mark-arrow" aria-hidden="true">arrow_outward</span></a>.</span>
+          <span class="de">Gemeinsam verbessern wir das Leben von Tieren — und das der Menschen, die für sie arbeiten. Auch nach der Übergabe bleibt die Marke in der Tiergesundheit, in einer <a class="fit__mark" href="#unternehmensziel">Mission<span class="material-symbols-outlined fit__mark-arrow" aria-hidden="true">arrow_outward</span></a>. Mitarbeiter und Familien bleiben Teil davon.</span>
+          <span class="en">We make animals’ lives better — and the lives of the people who work for them. After the handoff, the brand stays in animal health, inside a <a class="fit__mark" href="#unternehmensziel">mission<span class="material-symbols-outlined fit__mark-arrow" aria-hidden="true">arrow_outward</span></a>. The people and their families stay part of it.</span>
         </p>
         <p>
-          <span class="de">Unser Unternehmensziel heißt Glück. Wir glauben, dass erfolgreiche Unternehmen bei glücklichen Menschen beginnen. Deshalb geht es bei einer Nachfolge mit uns nicht nur um den Deal — sondern darum, dass Team, Kultur und Idee weiterleben.</span>
-          <span class="en">Our goal as a company is happiness. We believe good companies start with happy people. So succession with us isn’t just a deal — it’s making sure the team, the culture and the idea live on.</span>
+          <span class="de">Unser Unternehmensziel heißt Glück. Wir glauben, dass erfolgreiche Unternehmen bei glücklichen Menschen beginnen. Deshalb geht es bei einer Nachfolge mit uns nicht nur um den Deal — sondern darum, dass Kultur, Verantwortung und Idee weiterleben.</span>
+          <span class="en">Our goal as a company is happiness. We believe good companies start with happy people. So succession with us isn’t just a deal — it’s making sure the culture, the responsibility and the idea live on.</span>
         </p>
       </div>
       <div class="stance__media reveal-scale">
@@ -3538,8 +3555,8 @@
       </div>
     </div>
     <p class="paths__lead reveal">
-      <span class="de">Du denkst über Unternehmensnachfolge nach — aber nicht um jeden Preis. Dein Unternehmen soll weiterleben: der Name, das Team, die Idee dahinter. Bei uns bleibt es in der Tiergesundheit, geführt von Menschen, die verstehen, warum du es gegründet hast. Ob du übergibst und gehst, übergibst und bleibst, oder erstmal nur reden willst: Du bestimmst das Tempo.</span>
-      <span class="en">You’re thinking about succession. You won’t sell to just anyone. You want the company to live on: the name, the team, the idea. With us it stays in animal health, run by people who understand why you started it. Hand it over and leave, hand it over and stay, or just talk first. You set the pace.</span>
+      <span class="de">Du denkst über Unternehmensnachfolge nach — aber nicht um jeden Preis. Dein Unternehmen soll weiterleben: der Name, das Team, die Idee dahinter. Bei uns bleibt es in der Tiergesundheit, geführt von Menschen, die verstehen, was du aufgebaut hast. Ob du übergibst und gehst, übergibst und bleibst, oder erstmal nur reden willst: Du bestimmst das Tempo.</span>
+      <span class="en">You’re thinking about succession. You won’t sell to just anyone. You want the company to live on: the name, the team, the idea. With us it stays in animal health, run by people who understand what you built. Hand it over and leave, hand it over and stay, or just talk first. You set the pace.</span>
     </p>
     <div class="paths__grid reveal">
       <article class="paths__way paths__way--a flow reveal">
@@ -3552,8 +3569,8 @@
         </div>
         <div class="paths__body flow">
           <p>
-            <span class="de">Du übergibst. Wir führen weiter — Name, Team und Idee bleiben. Du gehst, wenn du bereit bist.</span>
-            <span class="en">You hand it over. We keep going — name, team and idea stay. You leave when you’re ready.</span>
+            <span class="de">Die operative Führung liegt bei uns. Name, Mitarbeiter und Idee bleiben. Du steigst aus dem Tagesgeschäft aus, in dem Tempo, das zu dir passt.</span>
+            <span class="en">Operations sit with us. The name, the people and the idea stay. You step back from the day-to-day at the pace that suits you.</span>
           </p>
         </div>
       </article>
@@ -4123,8 +4140,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Den Ruhestand genießen?</span>
-          <span class="en">Enjoy retirement?</span>
+          <span class="de">Aus dem Tagesgeschäft aussteigen?</span>
+          <span class="en">Step back from the day-to-day?</span>
         </p>
       </li>
     </ul>
@@ -4152,8 +4169,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Wenn dir Name, Team und Idee wichtiger sind als der höchste Preis.</span>
-          <span class="en">If the name, the team and the idea matter more than the highest bid.</span>
+          <span class="de">Wenn dir Mitarbeiter, Familien und die Tiere dahinter wichtiger sind als der höchste Preis.</span>
+          <span class="en">If the people, their families and the animals matter more than the highest bid.</span>
         </p>
       </li>
       <li class="fit__item reveal">
