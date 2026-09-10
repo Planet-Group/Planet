@@ -119,14 +119,12 @@
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    background-image: repeating-conic-gradient(
-      var(--planet-primary) 0deg 90deg,
-      transparent 90deg 180deg
-    );
+    /* 2×2-SVG statt conic-gradient: Safari macht aus 2px-Conic oft große Karos. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2' shape-rendering='crispEdges'%3E%3Cpath fill='%230000FF' d='M0 0h1v1H0zm1 1h1v1H1z'/%3E%3C/svg%3E");
     background-size: 2px 2px;
+    background-repeat: repeat;
     background-position: 0 0;
     background-attachment: scroll;
-    image-rendering: pixelated;
     transform: none;
   }
   /* Desktop: Kacheln am Viewport, aber nie in den Orbit-Kreisen —
