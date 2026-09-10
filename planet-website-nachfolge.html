@@ -95,99 +95,29 @@
   }
 
   /*
-    Raster: Fenster sitzt am body (position:fixed), nicht im Foto.
-    Scroll-Timeline schiebt Fenster und Muster gegengleich —
-    dasselbe Timeline-Progress, kein Kampf mit dem Foto-Scroll.
-    Ohne Timeline: eine Viewport-Schicht, Clip per JS (kann nachlaufen).
+    Raster sitzt IM Foto und wird von dessen overflow geclippt.
+    Kein separates Fenster — kein Versatz, kein Überlaufen auf Text.
+    background-attachment:fixed hält die Kacheln am Viewport, wo der
+    Browser das kann (nicht hinter transform, nicht auf iOS).
   */
-  .photo-rasters { display: contents; }
-  .photo-raster-win {
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 4;
-    width: var(--el-w, 0px);
-    height: var(--el-h, 0px);
+  .hero-full__media,
+  .pillar-orbit__media,
+  .quote-scroll__media,
+  .team-strip__photo {
     overflow: hidden;
-    overflow: clip;
-    isolation: isolate;
-    clip-path: inset(0);
-    pointer-events: none;
-    animation: photo-raster-win linear both;
-    animation-timeline: scroll(root);
   }
-  .photo-raster-win--circle {
-    border-radius: 50%;
-    clip-path: circle(50% at 50% 50%);
+  .team-strip__photo {
+    position: relative;
   }
-  .photo-raster-pat {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100lvh;
-    background-image: repeating-conic-gradient(
-      var(--planet-primary) 0deg 90deg,
-      transparent 90deg 180deg
-    );
-    background-size: 2px 2px;
-    background-position: 0 0;
-    image-rendering: pixelated;
-    animation: photo-raster-pat linear both;
-    animation-timeline: scroll(root);
-  }
-  @keyframes photo-raster-win {
-    from {
-      transform: translate3d(var(--el-x, 0px), var(--el-y, 0px), 0);
-    }
-    to {
-      transform: translate3d(
-        calc(var(--el-x, 0px) - var(--raster-scroll-max-x, 0px)),
-        calc(var(--el-y, 0px) - var(--raster-scroll-max-y, 0px)),
-        0
-      );
-    }
-  }
-  @keyframes photo-raster-pat {
-    from {
-      transform: translate3d(
-        calc(-1 * var(--el-x, 0px)),
-        calc(-1 * var(--el-y, 0px)),
-        0
-      );
-    }
-    to {
-      transform: translate3d(
-        calc(-1 * var(--el-x, 0px) + var(--raster-scroll-max-x, 0px)),
-        calc(-1 * var(--el-y, 0px) + var(--raster-scroll-max-y, 0px)),
-        0
-      );
-    }
-  }
-  .photo-raster {
-    position: fixed;
-    inset: 0;
-    z-index: 4;
-    pointer-events: none;
-    background-image: repeating-conic-gradient(
-      var(--planet-primary) 0deg 90deg,
-      transparent 90deg 180deg
-    );
-    background-size: 2px 2px;
-    background-position: 0 0;
-    image-rendering: pixelated;
-  }
-  .photo-raster[hidden] { display: none; }
-  @supports (animation-timeline: scroll()) {
-    .photo-raster { display: none !important; }
-  }
-  @supports not (animation-timeline: scroll()) {
-    .photo-raster-win { display: none; }
-  }
+  .hero-full__media::after,
+  .pillar-orbit__media::after,
+  .quote-scroll__media::after,
+  .team-strip__photo::after,
   .quote-type__bg::after {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 2;
     pointer-events: none;
     background-image: repeating-conic-gradient(
       var(--planet-primary) 0deg 90deg,
@@ -195,6 +125,7 @@
     );
     background-size: 2px 2px;
     background-position: 0 0;
+    background-attachment: fixed;
     image-rendering: pixelated;
   }
 
@@ -711,7 +642,7 @@
   .reveal-scale { transform: scale(0.88); }
   .reveal-scale.is-visible {
     opacity: 1;
-    transform: scale(1);
+    transform: none;
   }
   .reveal-slide-left.is-visible,
   .reveal-slide-right.is-visible {
@@ -2969,9 +2900,6 @@
 </head>
 <body>
 
-<div class="photo-rasters" aria-hidden="true"></div>
-<div class="photo-raster" hidden aria-hidden="true"></div>
-
 <nav class="nav nav--on-hero">
   <div class="nav-inner">
     <a class="logo" href="#top">Planet</a>
@@ -5014,107 +4942,6 @@ function toggleLang() {
     }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll(revealSelectors).forEach(el => observer.observe(el));
   }
-})();
-
-(function() {
-  const photos = [...document.querySelectorAll(
-    '.hero-full__media, .pillar-orbit__media, .quote-scroll__media, .team-strip__photo'
-  )];
-  if (!photos.length) return;
-
-  const circleSel = '.pillar-orbit__media, .team-strip__photo';
-  const canFollow = CSS.supports('animation-timeline: scroll()');
-  const se = () => document.scrollingElement || document.documentElement;
-
-  if (canFollow) {
-    const host = document.querySelector('.photo-rasters');
-    if (!host) return;
-    const wins = photos.map((el) => {
-      const win = document.createElement('div');
-      win.className = 'photo-raster-win' + (el.matches(circleSel) ? ' photo-raster-win--circle' : '');
-      const pat = document.createElement('div');
-      pat.className = 'photo-raster-pat';
-      win.appendChild(pat);
-      host.appendChild(win);
-      return win;
-    });
-
-    function measure() {
-      const root = document.documentElement;
-      const scroller = se();
-      root.style.setProperty(
-        '--raster-scroll-max-x',
-        `${Math.max(0, scroller.scrollWidth - scroller.clientWidth)}px`
-      );
-      root.style.setProperty(
-        '--raster-scroll-max-y',
-        `${Math.max(0, scroller.scrollHeight - scroller.clientHeight)}px`
-      );
-      photos.forEach((el, i) => {
-        const r = el.getBoundingClientRect();
-        const win = wins[i];
-        win.style.setProperty('--el-x', `${Math.round(r.left + scroller.scrollLeft)}px`);
-        win.style.setProperty('--el-y', `${Math.round(r.top + scroller.scrollTop)}px`);
-        win.style.setProperty('--el-w', `${Math.round(r.width)}px`);
-        win.style.setProperty('--el-h', `${Math.round(r.height)}px`);
-      });
-    }
-
-    measure();
-    requestAnimationFrame(measure);
-    window.addEventListener('load', measure);
-    window.addEventListener('resize', measure);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', measure);
-    }
-    document.querySelectorAll('.reveal-scale').forEach((el) => {
-      el.addEventListener('transitionend', measure);
-    });
-    return;
-  }
-
-  const layer = document.querySelector('.photo-raster');
-  if (!layer) return;
-
-  function clipPathFromPhotos() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    let d = '';
-    photos.forEach((el) => {
-      const r = el.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) return;
-      if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) return;
-      if (el.matches(circleSel)) {
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const rad = Math.min(r.width, r.height) / 2;
-        d += `M ${cx - rad},${cy} a ${rad},${rad} 0 1,0 ${rad * 2},0 a ${rad},${rad} 0 1,0 ${-rad * 2},0 `;
-      } else {
-        d += `M ${r.left},${r.top} h ${r.width} v ${r.height} h ${-r.width} z `;
-      }
-    });
-    return d;
-  }
-
-  function paint() {
-    const d = clipPathFromPhotos();
-    if (!d) {
-      layer.hidden = true;
-      layer.style.clipPath = '';
-      layer.style.webkitClipPath = '';
-      return;
-    }
-    layer.hidden = false;
-    const path = `path('${d.trim()}')`;
-    layer.style.clipPath = path;
-    layer.style.webkitClipPath = path;
-  }
-
-  function loop() {
-    paint();
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
 })();
 </script>
 </body>
