@@ -95,16 +95,68 @@
   }
 
   /*
-    1-Pixel-Schachbrett, fest am Viewport — nie am Foto.
-    Eine body-Schicht (kein transform-Ahn) wird auf die Foto-Rechtecke
-    geclippt. Kreise dürfen darunter rotieren, das Raster steht.
-    Quote-Type hat schon ein eigenes position:fixed (Stacking-Kontext):
-    dort liegt eine zweite, gleiche Schicht zwischen Bild und Text.
+    1-Pixel-Schachbrett, viewport-fest.
+    Die Schicht sitzt IM Foto (overflow clippt nativ mit — kein JS-Versatz).
+    Eine Viewport-große Fläche wird per scroll-timeline gegen den Scroll
+    geschoben, damit die Kacheln stehen bleiben. Ohne Timeline:
+    background-attachment:fixed (Desktop; iOS ignoriert das).
   */
-  .photo-raster {
-    position: fixed;
+  .hero-full__media,
+  .pillar-orbit__media,
+  .quote-scroll__media,
+  .team-strip__photo {
+    overflow: hidden;
+  }
+  .team-strip__photo {
+    position: relative;
+  }
+  .photo-raster-sheet {
+    position: absolute;
     inset: 0;
-    z-index: 4;
+    z-index: 2;
+    pointer-events: none;
+    background-image: repeating-conic-gradient(
+      var(--planet-primary) 0deg 90deg,
+      transparent 90deg 180deg
+    );
+    background-size: 2px 2px;
+    background-position: 0 0;
+    background-attachment: fixed;
+    image-rendering: pixelated;
+  }
+  @supports (animation-timeline: scroll()) {
+    .photo-raster-sheet {
+      inset: auto;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100lvh;
+      background-attachment: scroll;
+      animation: photo-raster-pin linear both;
+      animation-timeline: scroll(root);
+      will-change: transform;
+    }
+    @keyframes photo-raster-pin {
+      from {
+        transform: translate3d(
+          calc(-1 * var(--raster-el-x, 0px)),
+          calc(-1 * var(--raster-el-y, 0px)),
+          0
+        );
+      }
+      to {
+        transform: translate3d(
+          calc(-1 * var(--raster-el-x, 0px) + var(--raster-scroll-max-x, 0px)),
+          calc(-1 * var(--raster-el-y, 0px) + var(--raster-scroll-max-y, 0px)),
+          0
+        );
+      }
+    }
+  }
+  .quote-type__bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
     pointer-events: none;
     background-image: repeating-conic-gradient(
       var(--planet-primary) 0deg 90deg,
@@ -113,15 +165,6 @@
     background-size: 2px 2px;
     background-position: 0 0;
     image-rendering: pixelated;
-  }
-  .photo-raster[hidden] { display: none; }
-  .photo-raster--quote {
-    z-index: 1;
-    opacity: var(--quote-bg);
-    clip-path: none;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .photo-raster--quote { display: none; }
   }
 
   /* Full-Screen Hero */
@@ -637,7 +680,7 @@
   .reveal-scale { transform: scale(0.88); }
   .reveal-scale.is-visible {
     opacity: 1;
-    transform: scale(1);
+    transform: none;
   }
   .reveal-slide-left.is-visible,
   .reveal-slide-right.is-visible {
@@ -1683,8 +1726,11 @@
   }
   .team-strip__shift {
     --parallax-y: 0px;
-    transform: translate3d(0, var(--parallax-y), 0);
-    will-change: transform;
+    transform: none;
+    will-change: auto;
+  }
+  .team-strip__shift .team-strip__photo {
+    background-position: center calc(50% + var(--parallax-y));
   }
   .team-strip__person:not(:last-child)::after {
     content: "";
@@ -2895,8 +2941,6 @@
 </head>
 <body>
 
-<div class="photo-raster" hidden aria-hidden="true"></div>
-
 <nav class="nav nav--on-hero">
   <div class="nav-inner">
     <a class="logo" href="#top">Planet</a>
@@ -3521,7 +3565,6 @@
     <img src="assets/images/149---Inuvet-Sommerfest-2026_Tag-01_149.jpg" alt="">
     <div class="quote-type__bg-veil"></div>
   </div>
-  <div class="photo-raster photo-raster--quote" aria-hidden="true"></div>
   <div class="quote-type__content reveal">
     <blockquote class="quote-type__quote">
       <p class="quote-type__text">
@@ -4943,56 +4986,48 @@ function toggleLang() {
 })();
 
 (function() {
-  const layer = document.querySelector('.photo-raster:not(.photo-raster--quote)');
-  if (!layer) return;
-
-  const photos = [...document.querySelectorAll(
+  const hosts = [...document.querySelectorAll(
     '.hero-full__media, .pillar-orbit__media, .quote-scroll__media, .team-strip__photo'
   )];
-  const circleSel = '.pillar-orbit__media, .team-strip__photo';
+  if (!hosts.length) return;
 
-  function clipPathFromPhotos() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    let d = '';
+  hosts.forEach((el) => {
+    if (el.querySelector(':scope > .photo-raster-sheet')) return;
+    const sheet = document.createElement('div');
+    sheet.className = 'photo-raster-sheet';
+    sheet.setAttribute('aria-hidden', 'true');
+    el.appendChild(sheet);
+  });
 
-    photos.forEach((el) => {
+  const root = document.documentElement;
+
+  function measure() {
+    const se = document.scrollingElement || root;
+    root.style.setProperty(
+      '--raster-scroll-max-x',
+      `${Math.max(0, se.scrollWidth - window.innerWidth)}px`
+    );
+    root.style.setProperty(
+      '--raster-scroll-max-y',
+      `${Math.max(0, se.scrollHeight - window.innerHeight)}px`
+    );
+    hosts.forEach((el) => {
       const r = el.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) return;
-      if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) return;
-
-      if (el.matches(circleSel)) {
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const rad = Math.min(r.width, r.height) / 2;
-        d += `M ${cx - rad},${cy} a ${rad},${rad} 0 1,0 ${rad * 2},0 a ${rad},${rad} 0 1,0 ${-rad * 2},0 `;
-      } else {
-        d += `M ${r.left},${r.top} h ${r.width} v ${r.height} h ${-r.width} z `;
-      }
+      el.style.setProperty('--raster-el-x', `${Math.round(r.left + window.scrollX)}px`);
+      el.style.setProperty('--raster-el-y', `${Math.round(r.top + window.scrollY)}px`);
     });
-
-    return d;
   }
 
-  function paint() {
-    const d = clipPathFromPhotos();
-    if (!d) {
-      layer.hidden = true;
-      layer.style.clipPath = '';
-      layer.style.webkitClipPath = '';
-      return;
-    }
-    layer.hidden = false;
-    const path = `path('${d.trim()}')`;
-    layer.style.clipPath = path;
-    layer.style.webkitClipPath = path;
+  measure();
+  requestAnimationFrame(measure);
+  window.addEventListener('load', measure);
+  window.addEventListener('resize', measure);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', measure);
   }
-
-  function loop() {
-    paint();
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
+  document.querySelectorAll('.reveal-scale').forEach((el) => {
+    el.addEventListener('transitionend', measure);
+  });
 })();
 </script>
 </body>
