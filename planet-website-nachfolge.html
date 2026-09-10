@@ -125,8 +125,22 @@
     );
     background-size: 2px 2px;
     background-position: 0 0;
-    background-attachment: fixed;
+    background-attachment: scroll;
     image-rendering: pixelated;
+    transform: none;
+  }
+  /* Desktop: Kacheln am Viewport, aber nie in den Orbit-Kreisen —
+     fixed + transform (Rotation/Hover/Reveal) skaliert die 2px und erzeugt Moire. */
+  @media (hover: hover) and (pointer: fine) {
+    .hero-full__media::after,
+    .quote-scroll__media::after,
+    .team-strip__photo::after,
+    .quote-type__bg::after {
+      background-attachment: fixed;
+    }
+  }
+  .pillar-orbit__media::after {
+    background-attachment: scroll;
   }
 
   /* Full-Screen Hero */
@@ -591,6 +605,7 @@
     inset: 8%;
     border-radius: var(--radius-circle);
     overflow: hidden;
+    isolation: isolate;
   }
   .pillar-circle-img {
     width: 100%;
@@ -623,9 +638,11 @@
   }
   .pillar-band--blue .pillar-orbit__caption text { fill: var(--planet-white); }
 
-  .pillar-row:hover .pillar-row__img.reveal-scale.is-visible,
-  .pillar-row:focus-within .pillar-row__img.reveal-scale.is-visible {
-    transform: scale(1.03);
+  @media (hover: hover) and (pointer: fine) {
+    .pillar-row:hover .pillar-row__img.reveal-scale.is-visible,
+    .pillar-row:focus-within .pillar-row__img.reveal-scale.is-visible {
+      transform: scale(1.03);
+    }
   }
   .pillar-row__body h3 { font-size: var(--text-h2); }
   .pillar-row__body.flow > h3 + * { --flow-space: var(--space-1); }
