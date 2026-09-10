@@ -95,8 +95,9 @@
   }
 
   /*
-    Raster: 1-CSS-Pixel-Karo auf einer viewport-großen Fläche,
-    geclippt vom Foto. Kleine 2px-Tiles skaliert Safari in Kreisen hoch.
+    Raster nur auf der Fotofläche (inset 0). Keine 100vw-Schicht —
+    iOS clippt die nicht und legt das Karo über den Text.
+    32px-PNG mit 1px-Zellen, damit Safari die Kacheln nicht hochskaliert.
   */
   .hero-full__media,
   .pillar-orbit__media,
@@ -106,7 +107,8 @@
   }
   .pillar-orbit__media,
   .team-strip__photo {
-    clip-path: circle(50% at 50% 50%);
+    -webkit-mask-image: radial-gradient(circle closest-side, #000 99%, transparent 100%);
+    mask-image: radial-gradient(circle closest-side, #000 99%, transparent 100%);
   }
   .team-strip__photo {
     position: relative;
@@ -118,12 +120,7 @@
   .quote-type__bg::after {
     content: "";
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 100vw;
-    height: 100lvh;
-    margin-left: -50vw;
-    margin-top: -50lvh;
+    inset: 0;
     z-index: 2;
     pointer-events: none;
     background-image: url("assets/raster-1px.png");
