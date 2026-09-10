@@ -95,25 +95,14 @@
   }
 
   /*
-    1-Pixel-Schachbrett, viewport-fest.
-    Die Schicht sitzt IM Foto (overflow clippt nativ mit — kein JS-Versatz).
-    Eine Viewport-große Fläche wird per scroll-timeline gegen den Scroll
-    geschoben, damit die Kacheln stehen bleiben. Ohne Timeline:
-    background-attachment:fixed (Desktop; iOS ignoriert das).
+    Raster liegt fest am Viewport — die Kacheln bewegen sich nie.
+    Sichtbar nur über den Fotos (Clip). Der Clip kann auf iOS beim
+    Schwung-Scroll einen Hauch hinterherlaufen; das Raster selbst nicht.
   */
-  .hero-full__media,
-  .pillar-orbit__media,
-  .quote-scroll__media,
-  .team-strip__photo {
-    overflow: hidden;
-  }
-  .team-strip__photo {
-    position: relative;
-  }
-  .photo-raster-sheet {
-    position: absolute;
+  .photo-raster {
+    position: fixed;
     inset: 0;
-    z-index: 2;
+    z-index: 4;
     pointer-events: none;
     background-image: repeating-conic-gradient(
       var(--planet-primary) 0deg 90deg,
@@ -121,38 +110,9 @@
     );
     background-size: 2px 2px;
     background-position: 0 0;
-    background-attachment: fixed;
     image-rendering: pixelated;
   }
-  @supports (animation-timeline: scroll()) {
-    .photo-raster-sheet {
-      inset: auto;
-      left: 0;
-      top: 0;
-      width: 100vw;
-      height: 100lvh;
-      background-attachment: scroll;
-      animation: photo-raster-pin linear both;
-      animation-timeline: scroll(root);
-      will-change: transform;
-    }
-    @keyframes photo-raster-pin {
-      from {
-        transform: translate3d(
-          calc(-1 * var(--raster-el-x, 0px)),
-          calc(-1 * var(--raster-el-y, 0px)),
-          0
-        );
-      }
-      to {
-        transform: translate3d(
-          calc(-1 * var(--raster-el-x, 0px) + var(--raster-scroll-max-x, 0px)),
-          calc(-1 * var(--raster-el-y, 0px) + var(--raster-scroll-max-y, 0px)),
-          0
-        );
-      }
-    }
-  }
+  .photo-raster[hidden] { display: none; }
   .quote-type__bg::after {
     content: "";
     position: absolute;
@@ -680,7 +640,7 @@
   .reveal-scale { transform: scale(0.88); }
   .reveal-scale.is-visible {
     opacity: 1;
-    transform: none;
+    transform: scale(1);
   }
   .reveal-slide-left.is-visible,
   .reveal-slide-right.is-visible {
@@ -1726,11 +1686,8 @@
   }
   .team-strip__shift {
     --parallax-y: 0px;
-    transform: none;
-    will-change: auto;
-  }
-  .team-strip__shift .team-strip__photo {
-    background-position: center calc(50% + var(--parallax-y));
+    transform: translate3d(0, var(--parallax-y), 0);
+    will-change: transform;
   }
   .team-strip__person:not(:last-child)::after {
     content: "";
@@ -2940,6 +2897,8 @@
 </style>
 </head>
 <body>
+
+<div class="photo-raster" hidden aria-hidden="true"></div>
 
 <nav class="nav nav--on-hero">
   <div class="nav-inner">
@@ -4986,48 +4945,56 @@ function toggleLang() {
 })();
 
 (function() {
-  const hosts = [...document.querySelectorAll(
+  const layer = document.querySelector('.photo-raster');
+  if (!layer) return;
+
+  const photos = [...document.querySelectorAll(
     '.hero-full__media, .pillar-orbit__media, .quote-scroll__media, .team-strip__photo'
   )];
-  if (!hosts.length) return;
+  const circleSel = '.pillar-orbit__media, .team-strip__photo';
 
-  hosts.forEach((el) => {
-    if (el.querySelector(':scope > .photo-raster-sheet')) return;
-    const sheet = document.createElement('div');
-    sheet.className = 'photo-raster-sheet';
-    sheet.setAttribute('aria-hidden', 'true');
-    el.appendChild(sheet);
-  });
+  function clipPathFromPhotos() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let d = '';
 
-  const root = document.documentElement;
-
-  function measure() {
-    const se = document.scrollingElement || root;
-    root.style.setProperty(
-      '--raster-scroll-max-x',
-      `${Math.max(0, se.scrollWidth - window.innerWidth)}px`
-    );
-    root.style.setProperty(
-      '--raster-scroll-max-y',
-      `${Math.max(0, se.scrollHeight - window.innerHeight)}px`
-    );
-    hosts.forEach((el) => {
+    photos.forEach((el) => {
       const r = el.getBoundingClientRect();
-      el.style.setProperty('--raster-el-x', `${Math.round(r.left + window.scrollX)}px`);
-      el.style.setProperty('--raster-el-y', `${Math.round(r.top + window.scrollY)}px`);
+      if (r.width < 2 || r.height < 2) return;
+      if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) return;
+
+      if (el.matches(circleSel)) {
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const rad = Math.min(r.width, r.height) / 2;
+        d += `M ${cx - rad},${cy} a ${rad},${rad} 0 1,0 ${rad * 2},0 a ${rad},${rad} 0 1,0 ${-rad * 2},0 `;
+      } else {
+        d += `M ${r.left},${r.top} h ${r.width} v ${r.height} h ${-r.width} z `;
+      }
     });
+
+    return d;
   }
 
-  measure();
-  requestAnimationFrame(measure);
-  window.addEventListener('load', measure);
-  window.addEventListener('resize', measure);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', measure);
+  function paint() {
+    const d = clipPathFromPhotos();
+    if (!d) {
+      layer.hidden = true;
+      layer.style.clipPath = '';
+      layer.style.webkitClipPath = '';
+      return;
+    }
+    layer.hidden = false;
+    const path = `path('${d.trim()}')`;
+    layer.style.clipPath = path;
+    layer.style.webkitClipPath = path;
   }
-  document.querySelectorAll('.reveal-scale').forEach((el) => {
-    el.addEventListener('transitionend', measure);
-  });
+
+  function loop() {
+    paint();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
