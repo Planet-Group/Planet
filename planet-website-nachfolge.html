@@ -95,16 +95,18 @@
   }
 
   /*
-    Raster sitzt IM Foto und wird von dessen overflow geclippt.
-    Kein separates Fenster — kein Versatz, kein Überlaufen auf Text.
-    background-attachment:fixed hält die Kacheln am Viewport, wo der
-    Browser das kann (nicht hinter transform, nicht auf iOS).
+    Raster: 1-CSS-Pixel-Karo auf einer viewport-großen Fläche,
+    geclippt vom Foto. Kleine 2px-Tiles skaliert Safari in Kreisen hoch.
   */
   .hero-full__media,
   .pillar-orbit__media,
   .quote-scroll__media,
   .team-strip__photo {
     overflow: hidden;
+  }
+  .pillar-orbit__media,
+  .team-strip__photo {
+    clip-path: circle(50% at 50% 50%);
   }
   .team-strip__photo {
     position: relative;
@@ -116,29 +118,26 @@
   .quote-type__bg::after {
     content: "";
     position: absolute;
-    inset: 0;
+    left: 50%;
+    top: 50%;
+    width: 100vw;
+    height: 100lvh;
+    margin-left: -50vw;
+    margin-top: -50lvh;
     z-index: 2;
     pointer-events: none;
-    /* 2×2-SVG statt conic-gradient: Safari macht aus 2px-Conic oft große Karos. */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2' shape-rendering='crispEdges'%3E%3Cpath fill='%230000FF' d='M0 0h1v1H0zm1 1h1v1H1z'/%3E%3C/svg%3E");
-    background-size: 2px 2px;
+    background-image: url("assets/raster-1px.png");
+    background-size: 32px 32px;
     background-repeat: repeat;
     background-position: 0 0;
     background-attachment: scroll;
-    transform: none;
   }
-  /* Desktop: Kacheln am Viewport, aber nie in den Orbit-Kreisen —
-     fixed + transform (Rotation/Hover/Reveal) skaliert die 2px und erzeugt Moire. */
   @media (hover: hover) and (pointer: fine) {
     .hero-full__media::after,
     .quote-scroll__media::after,
-    .team-strip__photo::after,
     .quote-type__bg::after {
       background-attachment: fixed;
     }
-  }
-  .pillar-orbit__media::after {
-    background-attachment: scroll;
   }
 
   /* Full-Screen Hero */
