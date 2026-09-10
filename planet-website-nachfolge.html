@@ -136,6 +136,25 @@
       background-attachment: fixed;
     }
   }
+  /* Mobil: CSS-Kacheln sitzen oft zwischen Gerätepixeln → unregelmäßige große Karos. */
+  @media (hover: none), (pointer: coarse), (max-width: 1024px) {
+    .hero-full__media::after,
+    .pillar-orbit__media::after,
+    .quote-scroll__media::after,
+    .team-strip__photo::after,
+    .quote-type__bg::after {
+      display: none;
+    }
+  }
+  .photo-raster-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    pointer-events: none;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
 
   /* Full-Screen Hero */
   .hero-full {
@@ -4952,6 +4971,72 @@ function toggleLang() {
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll(revealSelectors).forEach(el => observer.observe(el));
+  }
+})();
+
+(function() {
+  const mobile = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 1024px)');
+  if (!mobile.matches) return;
+
+  const hosts = [...document.querySelectorAll(
+    '.hero-full__media, .pillar-orbit__media, .quote-scroll__media, .team-strip__photo, .quote-type__bg'
+  )];
+  if (!hosts.length) return;
+
+  function paint(canvas, cssW, cssH) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(1, Math.ceil(cssW * dpr));
+    const h = Math.max(1, Math.ceil(cssH * dpr));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    canvas.style.width = `${w / dpr}px`;
+    canvas.style.height = `${h / dpr}px`;
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+    const img = ctx.createImageData(w, h);
+    const data = img.data;
+    const cell = Math.max(1, Math.round(dpr));
+    for (let y = 0; y < h; y++) {
+      const cy = Math.floor(y / cell);
+      for (let x = 0; x < w; x++) {
+        if (((Math.floor(x / cell) + cy) & 1) === 0) {
+          const i = (y * w + x) << 2;
+          data[i + 2] = 255;
+          data[i + 3] = 255;
+        }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  const canvases = hosts.map((host) => {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'photo-raster-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    host.appendChild(canvas);
+    return { host, canvas };
+  });
+
+  function measure() {
+    canvases.forEach(({ host, canvas }) => {
+      const r = host.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return;
+      paint(canvas, r.width, r.height);
+    });
+  }
+
+  measure();
+  requestAnimationFrame(measure);
+  window.addEventListener('load', measure);
+  window.addEventListener('resize', measure);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', measure);
+  }
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(measure);
+    hosts.forEach((host) => ro.observe(host));
   }
 })();
 </script>
