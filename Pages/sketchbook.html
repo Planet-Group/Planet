@@ -107,6 +107,9 @@
   html.is-over-ui body { cursor: auto; }
   html.is-over-ui .pen { display: none; }
   html.is-drawing .pen__aim { opacity: 0.2; }
+  html.is-eraser .pen__tip {
+    background: color-mix(in srgb, var(--true-white) 28%, transparent);
+  }
 
   /* —— Werkzeugleiste —— */
   .tools {
@@ -118,7 +121,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     max-width: calc(100vw - var(--space-4));
     padding: 10px 12px;
@@ -202,19 +205,36 @@
     color: var(--true-black);
   }
   .tool-btn:hover { background: var(--planet-neutral); }
+  .tool-btn.is-on {
+    background: var(--planet-primary);
+    color: var(--true-white);
+  }
+  .tool-btn.is-on:hover { background: var(--planet-primary); }
   .tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .tool-btn .material-icons-outlined { font-size: var(--icon); }
+  .tool-btn svg { display: block; }
 
-  @media (max-width: 720px) {
+  @media (max-width: 1100px) {
     .tools {
-      border-radius: var(--radius-card);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: none;
+      width: 100%;
+      max-width: none;
+      flex-wrap: wrap;
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+      border-bottom: 0;
       gap: var(--space-1);
       padding: 10px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
     }
     .tools__group + .tools__group {
       padding-left: 10px;
     }
-    .tools__label { display: none; }
+  }
+  @media (max-width: 720px) {
     .sketch-brand { font-size: var(--text-h4); }
   }
 </style>
@@ -239,6 +259,14 @@
   </div>
   <div class="tools__group" role="radiogroup" aria-label="Stiftfarbe">
     <span class="tools__label">Stift</span>
+  </div>
+  <div class="tools__group">
+    <span class="tools__label">Radierer</span>
+    <button class="tool-btn" type="button" id="btn-erase" aria-label="Radiergummi" title="Radiergummi" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <path fill="currentColor" d="M16.24 3.56a2 2 0 0 1 2.83 0l1.37 1.37a2 2 0 0 1 0 2.83L10.2 18H6v-4.2L16.24 3.56Zm.71 1.42L7.5 14.43V16.5h2.07l8.97-8.97-1.59-1.55ZM5.5 19.25h13.5V21H4.75A.75.75 0 0 1 4 20.25v-3.4l1.5 1.2v1.2Z"/>
+      </svg>
+    </button>
   </div>
   <div class="tools__group" role="radiogroup" aria-label="Hintergrund">
     <span class="tools__label">Grund</span>
@@ -276,11 +304,13 @@
   const btnUndo = document.getElementById('btn-undo');
   const btnClear = document.getElementById('btn-clear');
   const btnSave = document.getElementById('btn-save');
+  const btnErase = document.getElementById('btn-erase');
 
   const state = {
     ink: '#FFFFFF',
     paper: 'blue',
     width: 8,
+    tool: 'pen',
     strokes: [],
     current: null,
     drawing: false
@@ -296,11 +326,14 @@
 
   function applyChrome() {
     html.dataset.paper = state.paper;
+    html.classList.toggle('is-eraser', state.tool === 'erase');
     html.style.setProperty('--paper', paperHex());
-    html.style.setProperty('--ink', state.ink);
+    html.style.setProperty('--ink', state.tool === 'erase' ? 'transparent' : state.ink);
     html.style.setProperty('--nib', state.width + 'px');
-    html.style.setProperty('--aim', aimColor(state.ink));
+    html.style.setProperty('--aim', aimColor(state.tool === 'erase' ? paperHex() : state.ink));
     btnUndo.disabled = state.strokes.length === 0 && !state.current;
+    btnErase.classList.toggle('is-on', state.tool === 'erase');
+    btnErase.setAttribute('aria-pressed', state.tool === 'erase');
   }
 
   /* —— UI bauen —— */
@@ -330,8 +363,12 @@
       btn.setAttribute('role', 'radio');
       btn.setAttribute('aria-label', (key === 'ink' ? 'Stift ' : 'Hintergrund ') + c.name);
       btn.addEventListener('click', () => {
-        if (key === 'ink') state.ink = c.hex;
-        else state.paper = c.id;
+        if (key === 'ink') {
+          state.ink = c.hex;
+          state.tool = 'pen';
+        } else {
+          state.paper = c.id;
+        }
         syncSwatches();
         applyChrome();
         persist();
@@ -340,7 +377,7 @@
     });
   }
   addSwatches(groups[1], 'ink');
-  addSwatches(groups[2], 'paper');
+  addSwatches(groups[3], 'paper');
 
   function syncNibs() {
     groups[0].querySelectorAll('.nib-btn').forEach((btn, i) => {
@@ -349,11 +386,11 @@
   }
   function syncSwatches() {
     groups[1].querySelectorAll('.swatch').forEach((btn) => {
-      const on = COLORS.find((c) => c.id === btn.dataset.id).hex === state.ink;
+      const on = state.tool !== 'erase' && COLORS.find((c) => c.id === btn.dataset.id).hex === state.ink;
       btn.classList.toggle('is-on', on);
       btn.setAttribute('aria-checked', on);
     });
-    groups[2].querySelectorAll('.swatch').forEach((btn) => {
+    groups[3].querySelectorAll('.swatch').forEach((btn) => {
       const on = btn.dataset.id === state.paper;
       btn.classList.toggle('is-on', on);
       btn.setAttribute('aria-checked', on);
@@ -369,8 +406,10 @@
   function drawStroke(s, context) {
     if (!s.points.length) return;
     context.save();
-    context.strokeStyle = s.color;
-    context.fillStyle = s.color;
+    context.globalCompositeOperation = s.erase ? 'destination-out' : 'source-over';
+    const paint = s.erase ? '#000000' : s.color;
+    context.strokeStyle = paint;
+    context.fillStyle = paint;
     context.lineWidth = s.width;
     context.lineCap = 'round';
     context.lineJoin = 'round';
@@ -456,6 +495,7 @@
     state.current = {
       color: state.ink,
       width: state.width,
+      erase: state.tool === 'erase',
       points: [pointFrom(e)]
     };
     redraw();
@@ -501,6 +541,16 @@
 
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  function setTool(tool) {
+    state.tool = tool;
+    syncSwatches();
+    applyChrome();
+  }
+
+  btnErase.addEventListener('click', () => {
+    setTool(state.tool === 'erase' ? 'pen' : 'erase');
+  });
+
   btnUndo.addEventListener('click', () => {
     state.strokes.pop();
     redraw();
@@ -517,15 +567,21 @@
   });
 
   btnSave.addEventListener('click', () => {
+    const dpr = window.devicePixelRatio || 1;
+    const ink = document.createElement('canvas');
+    ink.width = canvas.width;
+    ink.height = canvas.height;
+    const inkCtx = ink.getContext('2d');
+    inkCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    state.strokes.forEach((s) => drawStroke(s, inkCtx));
+
     const exportCanvas = document.createElement('canvas');
     exportCanvas.width = canvas.width;
     exportCanvas.height = canvas.height;
     const ex = exportCanvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
     ex.fillStyle = paperHex();
     ex.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-    ex.setTransform(dpr, 0, 0, dpr, 0, 0);
-    state.strokes.forEach((s) => drawStroke(s, ex));
+    ex.drawImage(ink, 0, 0);
     const a = document.createElement('a');
     a.href = exportCanvas.toDataURL('image/png');
     a.download = 'planet-sketchbook.png';
@@ -537,6 +593,9 @@
     if ((e.metaKey || e.ctrlKey) && key === 'z') {
       e.preventDefault();
       btnUndo.click();
+    } else if (!e.metaKey && !e.ctrlKey && !e.altKey && key === 'e') {
+      e.preventDefault();
+      setTool(state.tool === 'erase' ? 'pen' : 'erase');
     }
   });
 
