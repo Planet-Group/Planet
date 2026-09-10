@@ -94,70 +94,16 @@
     border-bottom: var(--line-width) solid var(--line-color);
   }
 
-  /*
-    Raster nur auf der Fotofläche (inset 0). Keine 100vw-Schicht —
-    iOS clippt die nicht und legt das Karo über den Text.
-    32px-PNG mit 1px-Zellen, damit Safari die Kacheln nicht hochskaliert.
-  */
-  .hero-full__media,
-  .pillar-orbit__media,
-  .quote-scroll__media,
-  .team-strip__photo {
-    overflow: hidden;
+  .hero-full__media {
+    background: #8a8a86;
   }
-  .pillar-orbit__media,
-  .team-strip__photo {
-    -webkit-mask-image: radial-gradient(circle closest-side, #000 99%, transparent 100%);
-    mask-image: radial-gradient(circle closest-side, #000 99%, transparent 100%);
-  }
-  .team-strip__photo {
-    position: relative;
-  }
-  .hero-full__media::after,
-  .pillar-orbit__media::after,
-  .quote-scroll__media::after,
-  .team-strip__photo::after,
-  .quote-type__bg::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    background-image: url("assets/raster-1px.png");
-    background-size: 32px 32px;
-    background-repeat: repeat;
-    background-position: 0 0;
-    background-attachment: scroll;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .hero-full__media::after,
-    .quote-scroll__media::after,
-    .quote-type__bg::after {
-      background-attachment: fixed;
-    }
-  }
-  /* Mobil: CSS-Kacheln sitzen oft zwischen Gerätepixeln → unregelmäßige große Karos. */
-  @media (hover: none), (pointer: coarse), (max-width: 1024px) {
-    .hero-full__media::after,
-    .pillar-orbit__media::after,
-    .quote-scroll__media::after,
-    .team-strip__photo::after,
-    .quote-type__bg::after {
-      display: none;
-    }
-  }
-  .photo-raster-canvas {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 2;
-    pointer-events: none;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+  .pillar-circle-img {
+    background: #c4c4c0;
   }
 
   /* Full-Screen Hero */
   .hero-full {
+    --media-blur: 24px;
     position: relative;
     min-height: 100svh;
     display: flex;
@@ -170,6 +116,11 @@
     position: absolute;
     inset: 0;
     z-index: 0;
+  }
+  .hero-full__media img,
+  .quote-type__bg img,
+  .quote-scroll__media img {
+    filter: blur(var(--media-blur, 0px));
   }
   .hero-full__media img {
     width: 100%;
@@ -204,8 +155,15 @@
     color: var(--planet-white);
     max-width: min(18ch, 100%);
     margin-bottom: 0;
+    overflow-wrap: normal;
     opacity: 0;
     animation: hero-rise 1400ms var(--ease-out) 700ms both;
+  }
+  @media (max-width: 640px) {
+    .hero-full h1 .hero-hyphen::after {
+      content: "-\A";
+      white-space: pre;
+    }
   }
   .hero-full__content.flow > h1 + * { --flow-space: var(--space-2); }
   .hero-full__sub {
@@ -397,10 +355,19 @@
   #wege.paths-scroll .section-head h2,
   #wege.paths-scroll .paths__way h2,
   #wege.paths-scroll .paths__lead,
-  #wege.paths-scroll .paths__body p {
+  #wege.paths-scroll .paths__body p,
+  #wege.paths-scroll .fit__text,
+  #wege.paths-scroll .fit__payoff {
     color: color-mix(
       in srgb,
       var(--planet-black) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
+  }
+  #wege.paths-scroll .fit__rule {
+    background: color-mix(
+      in srgb,
+      var(--planet-primary) calc((1 - var(--text-invert, 0)) * 100%),
       var(--planet-white)
     );
   }
@@ -556,6 +523,7 @@
   .stack__item:nth-child(12).reveal { transition-delay: 660ms; }
   .stack__item:nth-child(13).reveal { transition-delay: 720ms; }
   .stack__item:nth-child(14).reveal { transition-delay: 780ms; }
+  .stack__item:nth-child(15).reveal { transition-delay: 840ms; }
   @media (max-width: 1024px) {
     .stack__grid {
       grid-template-columns: 1fr 1fr;
@@ -932,7 +900,12 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .hero-full__media img { animation: none; transform: none; }
+    .hero-full,
+    .quote-type,
+    .quote-scroll { --media-blur: 0px; }
+    .hero-full__media img { animation: none; transform: none; filter: none; }
+    .quote-type__bg img,
+    .quote-scroll__media img { filter: none; }
     .hero-full__overlay { animation: none; }
     .hero-full h1,
     .hero-full__sub,
@@ -1000,14 +973,39 @@
       transition: none;
     }
     #plattform.plattform-scroll { background: transparent; }
-    #karten {
+    #varianten {
       --text-invert: 1;
     }
-    #karten .stance__body p {
+    #varianten .section-head h2,
+    #varianten .stance__body p {
       color: var(--planet-white);
     }
-    #karten .pillar-orbit__caption text {
-      fill: var(--planet-white);
+    #wege {
+      --text-invert: 1;
+    }
+    #wege.paths-scroll .section-head h2,
+    #wege.paths-scroll .paths__way h2,
+    #wege.paths-scroll .paths__body p,
+    #wege.paths-scroll .fit__text,
+    #wege.paths-scroll .fit__payoff {
+      color: var(--planet-white);
+    }
+    #wege.paths-scroll .fit__rule,
+    #wege.paths-scroll .paths__rule {
+      background: var(--planet-white);
+    }
+    #wege.paths-scroll .paths__index {
+      color: var(--planet-white);
+    }
+    #stats {
+      --text-invert: 1;
+    }
+    #stats .stat-strip__num,
+    #stats .stat-strip__label {
+      color: var(--planet-white);
+    }
+    #stats .stat-strip__item:nth-child(odd) .stat-strip__num {
+      color: var(--planet-white);
     }
     #unterschied {
       --text-invert: 1;
@@ -1472,6 +1470,13 @@
   .brands .section-head {
     margin-bottom: var(--space-4);
   }
+  #marken .section-head h2 {
+    color: color-mix(
+      in srgb,
+      var(--planet-black) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
+  }
   /* Marken-Signet — steht jetzt im jeweiligen Markenabschnitt, nicht mehr in einer Reihe */
   .brands__mark {
     display: block;
@@ -1521,7 +1526,7 @@
   .brands__brand:last-child {
     border-bottom: var(--line-width) solid var(--line-color, var(--planet-primary));
   }
-  /* Inuvet / EQX — weißes Band um das Zitat hart abzusetzen */
+  /* EQX — weißes Band, damit das Zitat darüber hart abschließt */
   .brands__brand--solid {
     position: relative;
     z-index: 0;
@@ -1538,9 +1543,8 @@
     background: var(--planet-white);
     z-index: -1;
   }
-  /* Vor dem Zitat (Inuvet): Trennlinie nach oben behalten, unten keine */
-  .brands__brand.brands__brand--solid-before,
-  .brands__brand.brands__brand--solid-before:last-child {
+  /* Inuvet: keine Linie vor dem Zitat, aber kein Weißband (sonst Kante zum Blau-Band) */
+  #marke-inuvet {
     border-bottom: 0;
   }
   /* Nach dem Zitat (EQX): oben keine Linie (harter Bildabschluss) */
@@ -1850,6 +1854,8 @@
   .fit__item:nth-child(2).is-visible .fit__rule { transition-delay: 120ms; }
   .fit__item:nth-child(3).is-visible .fit__rule { transition-delay: 180ms; }
   .fit__item:nth-child(4).is-visible .fit__rule { transition-delay: 240ms; }
+  .fit__item:nth-child(5).is-visible .fit__rule { transition-delay: 300ms; }
+  .fit__item:nth-child(6).is-visible .fit__rule { transition-delay: 360ms; }
   .fit__text {
     font-size: var(--text-h3);
     line-height: 1.15;
@@ -1878,6 +1884,26 @@
     font-size: var(--text-body);
     line-height: 1.35;
     font-weight: var(--weight-body);
+  }
+  .fit__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    margin-top: var(--space-6);
+  }
+  .fit__cta .contact-entry__note {
+    max-width: 40ch;
+  }
+  @media (max-width: 640px) {
+    .fit__cta {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .fit__cta .contact-entry__cta {
+      width: 100%;
+      justify-content: center;
+    }
   }
   /* Vergleich — Investor (rot / −) vs Planet (blau / +), Abbinder rechts */
   .compare {
@@ -2196,11 +2222,20 @@
     font-size: var(--text-body);
     line-height: 1.35;
   }
+  #unternehmer .section-head {
+    margin-bottom: 0;
+  }
+  #unternehmer h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
   #unternehmer .fit__list {
     margin-top: var(--space-2);
   }
 
-  /* Mission — transparent wie Karten; Blau nur über html-Scroll (gemeinsames Band mit #wege) */
+  /* Mission — transparent; Blau nur über html-Scroll (Band mit #unterschied) */
   .mission {
     padding: var(--space-10) 0;
     background: transparent;
@@ -2300,6 +2335,44 @@
   }
   @media (max-width: 640px) {
     .legal-overlay__inner { padding-inline: var(--space-3); }
+  }
+
+  /* #varianten — mit #wege im selben Blau-Band */
+  #varianten {
+    background: transparent;
+    --line-color: color-mix(
+      in srgb,
+      var(--planet-primary) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
+  }
+  #varianten .section-head h2,
+  #varianten .stance__body p {
+    color: color-mix(
+      in srgb,
+      var(--planet-black) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
+  }
+
+  /* #stats — im Blau-Band von #zahlen */
+  #stats {
+    background: transparent;
+  }
+  #stats .stat-strip__num,
+  #stats .stat-strip__label {
+    color: color-mix(
+      in srgb,
+      var(--planet-black) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
+  }
+  #stats .stat-strip__item:nth-child(odd) .stat-strip__num {
+    color: color-mix(
+      in srgb,
+      var(--planet-primary) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
   }
 
   /* #weiter — Blau über html-Scroll-Fade, Sektion transparent (keine Kante) */
@@ -2944,15 +3017,16 @@
 
 <div class="nav-overlay" role="dialog" aria-label="Navigation">
   <nav class="nav-overlay-links">
-    <a class="nav-overlay-link" href="#unternehmer"><span class="de">Unternehmer</span><span class="en">Entrepreneurs</span></a>
+    <a class="nav-overlay-link" href="#unternehmer"><span class="de">Abgeben</span><span class="en">Handing over</span></a>
+    <a class="nav-overlay-link" href="#varianten"><span class="de">Ganz oder Teile</span><span class="en">All or parts</span></a>
+    <a class="nav-overlay-link" href="#wege"><span class="de">Tempo</span><span class="en">Pace</span></a>
+    <a class="nav-overlay-link" href="#infrastruktur"><span class="de">Infrastruktur</span><span class="en">Infrastructure</span></a>
+    <a class="nav-overlay-link" href="#potenzial"><span class="de">Potenzial</span><span class="en">Potential</span></a>
     <a class="nav-overlay-link" href="#haltung"><span class="de">Haltung</span><span class="en">Who we are</span></a>
     <a class="nav-overlay-link" href="#unterschied"><span class="de">Unterschied</span><span class="en">Why us</span></a>
     <a class="nav-overlay-link" href="#mission"><span class="de">Mission</span><span class="en">Mission</span></a>
-    <a class="nav-overlay-link" href="#wege"><span class="de">Tempo</span><span class="en">Pace</span></a>
-    <a class="nav-overlay-link" href="#infrastruktur"><span class="de">Infrastruktur</span><span class="en">Infrastructure</span></a>
     <a class="nav-overlay-link" href="#marken"><span class="de">Marken</span><span class="en">Brands</span></a>
     <a class="nav-overlay-link" href="#team"><span class="de">Team</span><span class="en">Team</span></a>
-    <a class="nav-overlay-link" href="#partnerschaft"><span class="de">Partnerschaft</span><span class="en">Partnership</span></a>
     <a class="nav-overlay-link" href="#kriterien"><span class="de">Kriterien</span><span class="en">Fit</span></a>
     <a class="nav-overlay-link" href="#kontakt"><span class="de">Kontakt</span><span class="en">Get in touch</span></a>
     <a class="nav-overlay-link nav-overlay-link--cta" href="#fragebogen"><span class="de">Passt es? — 3 Minuten</span><span class="en">Is this a fit? — 3 minutes</span></a>
@@ -3072,8 +3146,8 @@
       </div>
 
       <h2 class="visually-hidden" id="quiz-title">
-        <span class="de">Ist Planet die richtige Nachfolge?</span>
-        <span class="en">Are we the right successor?</span>
+        <span class="de">Passt dein Unternehmen zu uns?</span>
+        <span class="en">Is this a fit?</span>
       </h2>
 
       <!-- Empfänger: Torsten sichtet die Fragebögen und lädt persönlich ein -->
@@ -3298,57 +3372,30 @@
 <!-- HERO -->
 <section class="hero-full" id="top">
   <div class="hero-full__media" aria-hidden="true">
-    <img src="assets/images/279---Inuvet-Sommerfest-2026_Tag-01_279.jpg" alt="">
+    <img src="assets/images/1.jpeg" alt="">
     <div class="hero-full__overlay"></div>
   </div>
   <div class="hero-full__content flow">
-    <h1><span class="de">Dein Unternehmen in guten Händen.</span><span class="en">Your company. In good hands.</span></h1>
+    <h1><span class="de">Dein Unter<span class="hero-hyphen"></span>nehmen in guten Händen.</span><span class="en">Your company. In good hands.</span></h1>
     <p class="hero-full__sub">
       <span class="de">Du denkst über Nachfolge nach — aber nicht um jeden Preis.</span>
       <span class="en">You’re thinking about succession. You won’t sell to just anyone.</span>
     </p>
   </div>
-  <a class="hero-full__scroll" href="#stats" aria-label="Scroll">
+  <a class="hero-full__scroll" href="#unternehmer" aria-label="Scroll">
     <span class="material-symbols-outlined">expand_more</span>
   </a>
-  <p class="photo-credit">
-    <span class="de">Bild: Planet Sommerparty 2026</span>
-    <span class="en">Image: Planet Summer Party 2026</span>
-  </p>
-</section>
-
-<!-- STATS -->
-<section class="stat-strip" id="stats">
-  <div class="container">
-    <div class="stat-strip__grid">
-      <div class="stat-strip__item reveal">
-        <div class="stat-strip__num"><span class="counter" data-target="2011" data-start="2000">2000</span></div>
-        <p class="stat-strip__label"><span class="de">Gründung des ersten Unternehmens</span><span class="en">We started in</span></p>
-      </div>
-      <div class="stat-strip__item reveal">
-        <div class="stat-strip__num"><span class="counter" data-target="150" data-suffix="+">0</span></div>
-        <p class="stat-strip__label"><span class="de">Mitarbeitende in der Gruppe</span><span class="en">People in the group</span></p>
-      </div>
-      <div class="stat-strip__item reveal">
-        <div class="stat-strip__num"><span class="counter" data-target="4">0</span></div>
-        <p class="stat-strip__label"><span class="de">Marken unter einem Dach</span><span class="en">Brands</span></p>
-      </div>
-      <div class="stat-strip__item reveal">
-        <div class="stat-strip__num"><span class="counter" data-target="20" data-prefix="&gt;" data-suffix="%" data-start="0">&gt;0%</span></div>
-        <p class="stat-strip__label"><span class="de">Ø jährliches Umsatzwachstum der Gruppe</span><span class="en">Yearly growth</span></p>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- UNTERNEHMER -->
-<section class="stance" id="unternehmer">
+<section class="stance fit--deal" id="unternehmer">
   <div class="container">
     <div class="section-head section-head--reveal reveal">
       <div>
         <h2>
-          <span class="de">Du bist Unternehmer</span>
-          <span class="en">You run a company</span>
+          <span class="fit__index" aria-hidden="true">01</span>
+          <span class="de">Du willst ganz aufhören —</span>
+          <span class="en">You want to stop altogether —</span>
         </h2>
       </div>
     </div>
@@ -3358,8 +3405,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du hast ein Unternehmen erfolgreich aufgebaut.</span>
-          <span class="en">You built a company that works.</span>
+          <span class="de">aber es gibt keinen Nachfolger in der Familie. Und keinen Käufer, dem du das anvertrauen würdest.</span>
+          <span class="en">but there’s no successor in the family. And no buyer you’d trust with it.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3367,8 +3414,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du führst Menschen — seit Jahren.</span>
-          <span class="en">You’ve been leading people for years.</span>
+          <span class="de">aber Name, Team und Idee sollen bleiben.</span>
+          <span class="en">but the name, the team and the idea should stay.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3376,8 +3423,28 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du willst, dass Name, Mitarbeiter und Idee bleiben.</span>
-          <span class="en">You want the name, the people and the idea to stay.</span>
+          <span class="de">aber erst willst du wissen, was aus deinen Leuten wird.</span>
+          <span class="en">but first you want to know what happens to your people.</span>
+        </p>
+      </li>
+    </ul>
+    <div class="section-head section-head--reveal reveal fit__subhead">
+      <div>
+        <h2>
+          <span class="fit__index" aria-hidden="true">02</span>
+          <span class="de">Du willst weitermachen — nur nicht mit allem.</span>
+          <span class="en">You want to keep going — just not with all of it.</span>
+        </h2>
+      </div>
+    </div>
+    <ul class="fit__list">
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Nicht mehr Personal finden, halten, ersetzen — und jedes Mal wieder von vorn.</span>
+          <span class="en">No more finding, keeping, replacing people — and starting over every time.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3385,15 +3452,356 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Du suchst Menschen, denen du das anvertrauen kannst.</span>
-          <span class="en">You’re looking for people you can trust with it.</span>
+          <span class="de">Nicht mehr jedem neuen Marketing-Kanal, jedem Tool hinterher. Jetzt auch noch KI.</span>
+          <span class="en">No more chasing every new marketing channel, every tool. Now AI on top.</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Nicht mehr das Tagesgeschäft, das die Zeit frisst für das, was du am besten kannst.</span>
+          <span class="en">No more day-to-day eating the time for what you do best.</span>
         </p>
       </li>
     </ul>
     <p class="stance-lines__close reveal">
-      <span class="de">Wir wissen, was das bedeutet.</span>
-      <span class="en">We know what that means.</span>
+      <span class="de">Zwei Ausgangslagen, eine Frage: Wer macht das, was du nicht mehr machen willst?</span>
+      <span class="en">Two starting points, one question: who takes on what you no longer want to do?</span>
     </p>
+  </div>
+</section>
+
+<!-- VARIANTEN + WEGE — ein Blau-Band -->
+<div data-band-blue>
+<section class="stance" id="varianten">
+  <div class="container">
+    <div class="section-head section-head--reveal reveal">
+      <div>
+        <h2>
+          <span class="de">Ganz oder in Teilen: Beides geht bei uns.</span>
+          <span class="en">All of it or parts of it: both work with us.</span>
+        </h2>
+      </div>
+    </div>
+    <div class="stance__grid">
+      <div class="stance__media reveal-scale">
+        <div class="pillar-orbit">
+          <div class="pillar-orbit__media">
+            <div class="pillar-circle-img" style="background-image: url('assets/images/2.jpeg');" role="img" aria-label=""></div>
+          </div>
+        </div>
+      </div>
+      <div class="stance__body flow reveal-slide-right">
+        <p>
+          <span class="de">Du kannst dein Unternehmen komplett übergeben — an Menschen, die es weiterführen statt weiterverkaufen. Oder du gibst nur die Bereiche ab, die dir seit Jahren auf den Nerv gehen, und bleibst in der Rolle, die du wirklich willst.</span>
+          <span class="en">Hand the whole company over — to people who keep running it instead of flipping it. Or hand over only the parts that have been grinding you down for years, and stay in the role you actually want.</span>
+        </p>
+        <p>
+          <span class="de">Du liebst Produktentwicklung? Mach Produktentwicklung. Du willst Märkte erschließen? Mach das. Du willst dein Wissen weitergeben statt Dienstpläne zu schreiben? Dann ist das deine Rolle. Alles andere kann bei uns liegen.</span>
+          <span class="en">You love product development? Do product development. You want to open new markets? Go. You’d rather pass on what you know than write rosters? Then that’s your role. Everything else can sit with us.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="paths paths-scroll" id="wege">
+  <div class="container">
+    <div class="section-head section-head--reveal reveal">
+      <div>
+        <h2>
+          <span class="de">Du bestimmst das Tempo. Und deine Rolle.</span>
+          <span class="en">You set the pace. And your role.</span>
+        </h2>
+      </div>
+    </div>
+    <div class="paths__grid reveal">
+      <article class="paths__way paths__way--a flow reveal">
+        <div class="paths__head">
+          <div class="paths__cue" aria-hidden="true">
+            <span class="paths__index">01</span>
+            <span class="paths__rule"></span>
+          </div>
+          <h2><span class="de">Erstmal nur reden</span><span class="en">Just talk first</span></h2>
+        </div>
+        <div class="paths__body flow">
+          <p>
+            <span class="de">Noch keine Entscheidung. Ein Gespräch reicht, um zu spüren, ob die Haltung stimmt — bevor irgendetwas formal wird.</span>
+            <span class="en">No decision yet. A conversation is enough to feel whether the stance is right — before anything gets formal.</span>
+          </p>
+        </div>
+      </article>
+      <article class="paths__way paths__way--b flow reveal">
+        <div class="paths__head">
+          <div class="paths__cue" aria-hidden="true">
+            <span class="paths__index">02</span>
+            <span class="paths__rule"></span>
+          </div>
+          <h2><span class="de">Ganz übergeben</span><span class="en">Hand over all of it</span></h2>
+        </div>
+        <div class="paths__body flow">
+          <p>
+            <span class="de">Die operative Führung liegt bei uns — sofort oder mit Übergangsphase. Du steigst aus, in deinem Tempo.</span>
+            <span class="en">Operations sit with us — right away or with a transition. You step out at your own pace.</span>
+          </p>
+        </div>
+      </article>
+      <article class="paths__way paths__way--c flow reveal">
+        <div class="paths__head">
+          <div class="paths__cue" aria-hidden="true">
+            <span class="paths__index">03</span>
+            <span class="paths__rule"></span>
+          </div>
+          <h2><span class="de">Teile abgeben</span><span class="en">Hand over parts</span></h2>
+        </div>
+        <div class="paths__body flow">
+          <p>
+            <span class="de">Teilverkauf oder Rückbeteiligung — die Rolle bleibt deine. Die Details gehören ins Gespräch, nicht auf eine Webseite.</span>
+            <span class="en">Partial sale or a stake you keep — the role stays yours. The details belong in a conversation, not on a website.</span>
+          </p>
+        </div>
+      </article>
+    </div>
+    <div class="section-head section-head--reveal reveal fit__subhead">
+      <div>
+        <h2>
+          <span class="de">Und deine Rolle danach?</span>
+          <span class="en">And your role after?</span>
+        </h2>
+      </div>
+    </div>
+    <ul class="fit__list">
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Weiter Verantwortung übernehmen?</span>
+          <span class="en">Stay in charge?</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Als Berater begleiten?</span>
+          <span class="en">Stay on as an advisor?</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Gesellschafter bleiben?</span>
+          <span class="en">Stay a shareholder?</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Aus dem Tagesgeschäft aussteigen?</span>
+          <span class="en">Step back from the day-to-day?</span>
+        </p>
+      </li>
+    </ul>
+    <p class="fit__payoff reveal">
+      <span class="de">Dein Einsatz soll sich auszahlen. Natürlich bekommst du einen fairen Preis — und die Gewissheit, dass dein Unternehmen, deine Mitarbeiter und deine Idee in guten Händen sind.</span>
+      <span class="en">This should work for you. A fair price, of course — and the certainty that your company, your people and your idea are in good hands.</span>
+    </p>
+  </div>
+</section>
+</div>
+
+<!-- INFRASTRUKTUR -->
+<section class="stack" id="infrastruktur">
+  <div class="container">
+    <div class="section-head section-head--reveal reveal">
+      <div>
+        <h2>
+          <span class="de">Mach was du willst. Wir machen den Rest.</span>
+          <span class="en">Do what you want. We’ll handle the rest.</span>
+        </h2>
+      </div>
+    </div>
+    <p class="stack__intro reveal">
+      <span class="de">Gib' ab, was du nicht gerne machst: Personal, Regulatory, Marketing, IT, Supply Chain — das läuft bei uns schon, für vier Marken. Dein Team dockt an. Du wählst, was du abgibst und was du behältst. Was fehlt, kommt dazu. Was sitzt, bleibt.</span>
+      <span class="en">Hand over what you don’t like doing: people, regulatory, marketing, IT, supply chain — it already runs for four brands. Your team plugs in. You choose what to hand over and what to keep. Use what you need. Keep what already works.</span>
+    </p>
+    <div class="stack__grid">
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">brush</span>
+        <h3><span class="de">Branding</span><span class="en">Branding</span></h3>
+        <p>
+          <span class="de">Die Marke ist dir wichtig — der Agentur-Marathon nicht. Positionierung, Kampagnen, Assets: Wir machen die Marke scharf, ohne dich zum Agentur-Kunden zu machen. Von Naming bis Launch, mit Leuten, die Tiergesundheit verstehen.</span>
+          <span class="en">The brand matters to you — the agency marathon doesn’t. Positioning, campaigns, assets: we make the brand sharp without turning you into an agency client. From naming to launch, with people who know animal health.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">handshake</span>
+        <h3><span class="de">Vertrieb</span><span class="en">Sales</span></h3>
+        <p>
+          <span class="de">Immer dieselben Gespräche mit denselben Partnern? Tierarzt-Außendienst und D2C — zwei Kanäle, ein System. Wir bringen Produkte in Praxen und direkt zu Tierhaltern, mit Strukturen, die skalieren.</span>
+          <span class="en">The same conversations with the same partners, every year? A vet field force and D2C — two channels, one system. We get product into clinics and straight to pet owners, on a setup that can scale.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">trending_up</span>
+        <h3><span class="de">Marketing</span><span class="en">Marketing</span></h3>
+        <p>
+          <span class="de">Dem nächsten Trend musst du nicht mehr hinterher. Campaigns, Content, Community — wir testen, lernen und skalieren, was wirkt. Weniger Bauchgefühl, mehr Loop.</span>
+          <span class="en">You no longer have to chase the next trend. Campaigns, content, community — we test, learn, and scale what works. Less gut feel. More of a loop.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">inventory_2</span>
+        <h3><span class="de">Logistik</span><span class="en">Logistics</span></h3>
+        <p>
+          <span class="de">Ein fehlendes Paket, und dein Telefon klingelt. Vom Wareneingang bis zur Praxis-Tür: Lager, Kommissionierung, Versand — damit dein Produkt ankommt, bevor jemand nachfragt.</span>
+          <span class="en">One missing parcel and your phone rings. From the warehouse door to the clinic: storage, picking, shipping — so the product arrives before anyone has to chase it.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">factory</span>
+        <h3><span class="de">Supply Chain</span><span class="en">Supply Chain</span></h3>
+        <p>
+          <span class="de">Rohstoff knapp, Lieferant spät, Preis gestiegen — und du hängst allein am Telefon. Wir sichern deine Kette ab und verhandeln Konditionen, die du allein nicht bekommst — damit nie ein Produkt fehlt, wenn die Nachfrage da ist.</span>
+          <span class="en">Raw material short, supplier late, price up — and you’re alone on the phone. We lock in the chain and negotiate terms you wouldn’t get on your own — so you aren’t out of stock when demand shows up.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">calculate</span>
+        <h3><span class="de">Controlling</span><span class="en">Controlling</span></h3>
+        <p>
+          <span class="de">Die Zahlen musst du nicht mehr selbst zusammensuchen. Reporting, Forecasts, Kennzahlen kommen fertig auf den Tisch — damit du entscheidest, statt nachzurechnen.</span>
+          <span class="en">You no longer have to pull the numbers together yourself. Reporting, forecasts, KPIs land on your desk ready — so you decide instead of catching up on the books.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">account_balance</span>
+        <h3><span class="de">Finance</span><span class="en">Finance</span></h3>
+        <p>
+          <span class="de">Bewertung, Struktur, Verhandlung — das musst du nicht allein durchstehen. Kapital, Bewertung, Deals: Wir kennen den Prozess von innen, ohne Fonds-Uhr im Nacken.</span>
+          <span class="en">Valuation, structure, negotiation — not something you have to get through alone. Capital, valuation, deals: we’ve been inside that process, with no fund clock on our back.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">dns</span>
+        <h3><span class="de">IT Systeme</span><span class="en">IT Systems</span></h3>
+        <p>
+          <span class="de">Um Systeme, Updates und Schnittstellen musst du dich nicht mehr kümmern. ERP, CRM, Shops, Integrationen — weniger Flickwerk, mehr Betriebssystem für dein Unternehmen.</span>
+          <span class="en">Systems, updates and interfaces are no longer your concern. ERP, CRM, shops, integrations — less patchwork, more of an operating system for the company.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">groups</span>
+        <h3><span class="de">Recruiting</span><span class="en">Recruiting</span></h3>
+        <p>
+          <span class="de">Du suchst gute Leute und findest keine — oder verlierst sie nach einem Jahr wieder? Recruiting, Onboarding, Prozesse — damit dein Team wächst, ohne dass HR dein Fulltime-Job wird.</span>
+          <span class="en">You look for good people and can’t find them — or lose them again after a year? Recruiting, onboarding, process — so the team can grow without HR becoming your full-time job.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">badge</span>
+        <h3><span class="de">HR und Personalführung</span><span class="en">HR &amp; people management</span></h3>
+        <p>
+          <span class="de">Verträge, Zeiterfassung, Krankheit, Dienstpläne, Gespräche. Der Teil der Führung, der Kraft kostet und keinen Umsatz bringt — läuft bei uns, damit du ihn nicht mehr tragen musst.</span>
+          <span class="en">Contracts, time tracking, sick leave, rosters, the hard conversations. The part of leading people that drains you and earns nothing — we run it, so you don’t have to carry it.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">verified</span>
+        <h3><span class="de">QM</span><span class="en">Quality</span></h3>
+        <p>
+          <span class="de">Audits, Chargendoku, Reklamationen — das musst du nicht mehr selbst im Blick haben. Prozesse, die halten, damit Qualität nicht vom Zufall abhängt, wenn die Stückzahl steigt.</span>
+          <span class="en">Audits, batch records, complaints — no longer yours to keep an eye on. Process that holds, so quality doesn’t become luck when volume goes up.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">auto_awesome</span>
+        <h3><span class="de">K.I.</span><span class="en">AI</span></h3>
+        <p>
+          <span class="de">KI soll man jetzt machen, sagen alle. Nur wer — und wofür? Text, Daten, interne Abläufe: KI als Werkzeug, nicht als Show. Damit dein Team an dem arbeitet, was nur Menschen können.</span>
+          <span class="en">Everyone says you should be doing AI now. Only who — and for what? Copy, data, internal work: AI as a tool, not a show. So the team spends time on what only people can do.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">precision_manufacturing</span>
+        <h3><span class="de">Produktion und Verpackung</span><span class="en">Production &amp; packaging</span></h3>
+        <p>
+          <span class="de">Eine eigene Linie aufbauen — für diese Stückzahl? Abfüllung, Konfektionierung, Packmittel: Wir bringen dein Produkt in eine Form, die Praxen und Lager verstehen, ohne dass du investieren musst.</span>
+          <span class="en">Build your own line — for that volume? Filling, packing, packaging: we get the product into a format clinics and warehouses work with, without you having to invest.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">policy</span>
+        <h3><span class="de">Regulatory Affairs</span><span class="en">Regulatory Affairs</span></h3>
+        <p>
+          <span class="de">Die Regeln ändern sich schneller, als du ihnen hinterherlaufen willst. Zulassung, Kennzeichnung, Vigilanz — wir kennen die Regeln in der Tiergesundheit, damit dein Produkt darf, was es verspricht.</span>
+          <span class="en">The rules change faster than you care to chase them. Registration, labelling, vigilance — we know the rules in animal health, so the product is allowed to do what it claims.</span>
+        </p>
+      </article>
+      <article class="stack__item flow reveal">
+        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">account_tree</span>
+        <h3><span class="de">Project Management</span><span class="en">Project Management</span></h3>
+        <p>
+          <span class="de">Zu viele Baustellen, und alle laufen über deinen Schreibtisch. Launch, Integration, Umbau — wir halten Termine und Abhängigkeiten, damit nichts zwischen den Stühlen liegt.</span>
+          <span class="en">Too many moving pieces, and all of them cross your desk. Launch, integration, rebuild — we keep dates and dependencies in line, so nothing falls between the cracks.</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- POTENZIAL -->
+<section class="fit fit--deal" id="potenzial">
+  <div class="container">
+    <div class="section-head section-head--reveal reveal">
+      <div>
+        <h2>
+          <span class="de">Das Potenzial ist da. Wir haben die Zeit dafür.</span>
+          <span class="en">The potential is there. We have the time for it.</span>
+        </h2>
+      </div>
+    </div>
+    <p class="fit__intro reveal">
+      <span class="de">Du glaubst, in deinem Unternehmen steckt mehr. Wahrscheinlich hast du recht. Nur: nochmal die Energie aufbringen, alles umzubauen — das muss nicht deine Aufgabe sein. Wir denken nicht in Fondslaufzeiten, sondern in Jahrzehnten. Das gibt uns Zeit, die ein Investor nicht hat.</span>
+      <span class="en">You believe there’s more in your company. You’re probably right. But summoning the energy to rebuild it all one more time doesn’t have to be your job. We don’t think in fund cycles. We think in decades. That gives us time an investor doesn’t have.</span>
+    </p>
+    <ul class="fit__list">
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Kein Exit-Datum. Was wir aufbauen, muss nicht in fünf Jahren verkauft werden.</span>
+          <span class="en">No exit date. What we build doesn’t have to be sold in five years.</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Eine Infrastruktur, die schon läuft — von Vertrieb bis Regulatory. Dein Team dockt an, statt neu zu bauen.</span>
+          <span class="en">An infrastructure that already runs — sales to regulatory. Your team plugs in instead of building from scratch.</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Deine Erfahrung bleibt im Spiel. Als Mentor, als Gesellschafter, als der, der das Produkt am besten kennt.</span>
+          <span class="en">Your experience stays in play. As a mentor, a shareholder, the one who knows the product best.</span>
+        </p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -3412,16 +3820,8 @@
       <div class="stance__media reveal-scale">
         <div class="pillar-orbit">
           <div class="pillar-orbit__media">
-            <div class="pillar-circle-img" style="background-image: url('assets/images/1---Inuvet-Sommerfest-2026_Tag-01_001.jpg');" role="img" aria-label=""></div>
+            <div class="pillar-circle-img" role="img" aria-label=""></div>
           </div>
-          <svg class="pillar-orbit__caption" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <defs>
-              <path id="orbit-haltung" fill="none" d="M50,50 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
-            </defs>
-            <text>
-              <textPath href="#orbit-haltung" xlink:href="#orbit-haltung" startOffset="8%">Bild: Planet Sommerparty 2026</textPath>
-            </text>
-          </svg>
         </div>
       </div>
       <div class="stance__body flow reveal-slide-right">
@@ -3429,45 +3829,17 @@
           <span class="de">Wir sind Unternehmer, die führen — wie du. Die Planet Group hat eine Mission: Tiere gesund machen. Und den Anspruch, Unternehmen weiterzuführen, nicht weiterzuverkaufen. Deins vielleicht auch.</span>
           <span class="en">We run companies — like you. Planet Group has a mission: keep animals healthy. And a stance: we keep companies. We don’t flip them. Yours, maybe.</span>
         </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- KARTEN → UNTERSCHIED → ZITAT → MISSION → WEGE — ein Blau-Band, kein Weißblitz dazwischen -->
-<div data-band-blue>
-<section class="stance stance--flip" id="karten">
-  <div class="container">
-    <div class="stance__grid">
-      <div class="stance__body flow reveal-slide-left">
-        <p>
-          <span class="de">Wenn du mit uns sprichst, sitzt dir kein Investor gegenüber, der dein Unternehmen als Profitmaschine sieht — kein Fonds, keine Bank, kein Private Equity. Sondern Unternehmer, denen die Gruppe zu 100&nbsp;% selbst gehört. Niemand, der nach acht Jahren verkaufen muss. Niemand, der nur die Zahlen sieht und die Menschen und Tiere dahinter nicht.</span>
-          <span class="en">When you sit down with us, there is no investor across the table who treats the company as a profit engine — no fund, no bank, no private equity. People who own the group, 100%. Nobody who has to sell in eight years. Nobody who only sees the numbers and misses the people and the animals.</span>
-        </p>
         <p>
           <span class="de">Du trägst Verantwortung für das Schicksal deiner Mitarbeiter und ihrer Familien. Natürlich willst du, dass sie in guten Händen sind. Wir kaufen nicht, um auszuschlachten. Wir führen es weiter — für die Tiere, und für die Menschen, die dafür arbeiten.</span>
           <span class="en">You carry the fate of your people, and their families. Of course you want them in good hands. We don’t buy to strip a company down. We keep running it — for the animals, and for the people who work for them.</span>
         </p>
       </div>
-      <div class="stance__media reveal-scale">
-        <div class="pillar-orbit">
-          <div class="pillar-orbit__media">
-            <div class="pillar-circle-img" style="background-image: url('assets/images/2---Inuvet-Sommerfest-2026_Tag-01_002.jpg');" role="img" aria-label=""></div>
-          </div>
-          <svg class="pillar-orbit__caption" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <defs>
-              <path id="orbit-karten" fill="none" d="M50,50 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
-            </defs>
-            <text>
-              <textPath href="#orbit-karten" xlink:href="#orbit-karten" startOffset="8%">Bild: Planet Sommerparty 2026</textPath>
-            </text>
-          </svg>
-        </div>
-      </div>
     </div>
   </div>
 </section>
 
+<!-- UNTERSCHIED → ZITAT → MISSION — ein Blau-Band, kein Weißblitz dazwischen -->
+<div data-band-blue>
 <!-- UNTERSCHIED -->
 <section class="compare" id="unterschied">
   <div class="container">
@@ -3566,10 +3938,6 @@
       <span class="en">from our <a class="fit__mark" href="#grundsaetze">principles<span class="material-symbols-outlined fit__mark-arrow" aria-hidden="true">arrow_outward</span></a></span>
     </footer>
   </div>
-  <p class="photo-credit">
-    <span class="de">Bild: Planet Sommerparty 2026</span>
-    <span class="en">Image: Planet Summer Party 2026</span>
-  </p>
 </section>
 
 <section class="mission" id="mission">
@@ -3596,218 +3964,15 @@
       <div class="stance__media reveal-scale">
         <div class="pillar-orbit">
           <div class="pillar-orbit__media">
-            <div class="pillar-circle-img" style="background-image: url('assets/images/4---Inuvet-Sommerfest-2026_Tag-01_004.jpg');" role="img" aria-label=""></div>
+            <div class="pillar-circle-img" role="img" aria-label=""></div>
           </div>
-          <svg class="pillar-orbit__caption" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <defs>
-              <path id="orbit-mission" fill="none" d="M50,50 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
-            </defs>
-            <text>
-              <textPath href="#orbit-mission" xlink:href="#orbit-mission" startOffset="8%">Bild: Planet Sommerparty 2026</textPath>
-            </text>
-          </svg>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="paths paths-scroll" id="wege">
-  <div class="container">
-    <div class="section-head section-head--reveal reveal">
-      <div>
-        <h2>
-          <span class="de">Du bestimmst das Tempo.</span>
-          <span class="en">You set the pace.</span>
-        </h2>
-      </div>
-    </div>
-    <p class="paths__lead reveal">
-      <span class="de">Du denkst über Unternehmensnachfolge nach — aber nicht um jeden Preis. Dein Unternehmen soll bleiben, was es ist: der Name, das Team, die Idee dahinter. Wir führen es weiter — mit Menschen, die verstehen, was du aufgebaut hast. Ob du übergibst und gehst, übergibst und bleibst, oder erstmal nur reden willst: Du bestimmst das Tempo.</span>
-      <span class="en">You’re thinking about succession. You won’t sell to just anyone. You want the company to stay what it is: the name, the team, the idea. We keep running it — with people who understand what you built. Hand it over and leave, hand it over and stay, or just talk first. You set the pace.</span>
-    </p>
-    <div class="paths__grid reveal">
-      <article class="paths__way paths__way--a flow reveal">
-        <div class="paths__head">
-          <div class="paths__cue" aria-hidden="true">
-            <span class="paths__index">01</span>
-            <span class="paths__rule"></span>
-          </div>
-          <h2><span class="de">Übergeben und gehen</span><span class="en">Hand it over and leave</span></h2>
-        </div>
-        <div class="paths__body flow">
-          <p>
-            <span class="de">Die operative Führung liegt bei uns. Name, Mitarbeiter und Idee bleiben. Du steigst aus dem Tagesgeschäft aus, in dem Tempo, das zu dir passt.</span>
-            <span class="en">Operations sit with us. The name, the people and the idea stay. You step back from the day-to-day at the pace that suits you.</span>
-          </p>
-        </div>
-      </article>
-      <article class="paths__way paths__way--b flow reveal">
-        <div class="paths__head">
-          <div class="paths__cue" aria-hidden="true">
-            <span class="paths__index">02</span>
-            <span class="paths__rule"></span>
-          </div>
-          <h2><span class="de">Übergeben und bleiben</span><span class="en">Hand it over and stay</span></h2>
-        </div>
-        <div class="paths__body flow">
-          <p>
-            <span class="de">Du übergibst — und bleibst so lange du willst: in der Führung, als Berater, als Gesellschafter. Die Rolle klären wir gemeinsam.</span>
-            <span class="en">You hand it over — and stay as long as you want: in charge, as an advisor, as a shareholder. We figure out the role together.</span>
-          </p>
-        </div>
-      </article>
-      <article class="paths__way paths__way--c flow reveal">
-        <div class="paths__head">
-          <div class="paths__cue" aria-hidden="true">
-            <span class="paths__index">03</span>
-            <span class="paths__rule"></span>
-          </div>
-          <h2><span class="de">Erstmal nur reden</span><span class="en">Just talk first</span></h2>
-        </div>
-        <div class="paths__body flow">
-          <p>
-            <span class="de">Noch keine Entscheidung. Ein Gespräch reicht, um zu spüren, ob die Haltung stimmt — bevor irgendetwas formal wird.</span>
-            <span class="en">No decision yet. A conversation is enough to feel whether the stance is right — before anything gets formal.</span>
-          </p>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
 </div>
-
-<!-- INFRASTRUKTUR -->
-<section class="stack" id="infrastruktur">
-  <div class="container">
-    <div class="section-head section-head--reveal reveal">
-      <div>
-        <h2>
-          <span class="de">Mach was du willst. Wir machen den Rest.</span>
-          <span class="en">Do what you want. We’ll handle the rest.</span>
-        </h2>
-      </div>
-    </div>
-    <p class="stack__intro reveal">
-      <span class="de">Supply Chain, IT, Logistik, Controlling, HR — das läuft weiter, auch wenn du das Tagesgeschäft abgibst. Dein Team dockt an eine Infrastruktur an, die all das schon kann. Modular: Was fehlt, kommt dazu. Was sitzt, bleibt.</span>
-      <span class="en">Supply chain, IT, logistics, controlling, HR — that keeps running, even when you step back from the day-to-day. Your team plugs into a setup that already does all of it. Use what you need. Keep what already works.</span>
-    </p>
-    <div class="stack__grid">
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">brush</span>
-        <h3><span class="de">Branding</span><span class="en">Branding</span></h3>
-        <p>
-          <span class="de">Positionierung, Kampagnen, Assets — wir machen die Marke scharf, ohne dich zum Agentur-Kunden zu machen. Von Naming bis Launch, mit Leuten die Tiergesundheit verstehen.</span>
-          <span class="en">Positioning, campaigns, assets — we make the brand sharp without turning you into an agency client. From naming to launch, with people who know animal health.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">handshake</span>
-        <h3><span class="de">Vertrieb</span><span class="en">Sales</span></h3>
-        <p>
-          <span class="de">Tierarzt-Außendienst und D2C — zwei Kanäle, ein System. Wir bringen Produkte in Praxen und direkt zu Tierhaltern, mit Strukturen die skalieren.</span>
-          <span class="en">A vet field force and D2C — two channels, one system. We get product into clinics and straight to pet owners, on a setup that can scale.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">trending_up</span>
-        <h3><span class="de">Marketing</span><span class="en">Marketing</span></h3>
-        <p>
-          <span class="de">Reichweite, die messbar ist. Campaigns, Content, Community — wir testen, lernen und skalieren, was wirkt. Weniger Bauchgefühl, mehr Loop.</span>
-          <span class="en">Reach you can measure. Campaigns, content, community — we test, learn, and scale what works. Less gut feel. More of a loop.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">inventory_2</span>
-        <h3><span class="de">Logistik</span><span class="en">Logistics</span></h3>
-        <p>
-          <span class="de">Vom Wareneingang bis zur Praxis-Tür. Lager, Kommissionierung, Versand — damit dein Produkt ankommt, bevor jemand nachfragt.</span>
-          <span class="en">From the warehouse door to the clinic. Storage, picking, shipping — so the product arrives before anyone has to chase it.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">factory</span>
-        <h3><span class="de">Supply Chain</span><span class="en">Supply Chain</span></h3>
-        <p>
-          <span class="de">Lieferanten, Rohstoffe, Verfügbarkeit. Wir sichern deine Kette ab und verhandeln Konditionen, die du allein nicht bekommst — damit nie ein Produkt fehlt, wenn die Nachfrage da ist.</span>
-          <span class="en">Suppliers, raw materials, availability. We lock in the chain and negotiate terms you wouldn’t get on your own — so you aren’t out of stock when demand shows up.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">calculate</span>
-        <h3><span class="de">Controlling</span><span class="en">Controlling</span></h3>
-        <p>
-          <span class="de">Zahlen, die du steuern kannst. Reporting, Forecasts, Kennzahlen — damit du entscheidest, statt nachzurechnen.</span>
-          <span class="en">Numbers you can actually steer with. Reporting, forecasts, KPIs — so you make the call, instead of catching up on the books.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">account_balance</span>
-        <h3><span class="de">Finance</span><span class="en">Finance</span></h3>
-        <p>
-          <span class="de">Kapital, Bewertung, Deals. Wenn eine Nachfolge ansteht — wir kennen den Prozess von innen, ohne Fonds-Uhr im Nacken.</span>
-          <span class="en">Capital, valuation, deals. When succession is on the table — we’ve been inside that process, with no fund clock on our back.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">dns</span>
-        <h3><span class="de">IT Systeme</span><span class="en">IT Systems</span></h3>
-        <p>
-          <span class="de">Tools, die zusammenarbeiten. ERP, CRM, Shops, Integrationen — weniger Flickwerk, mehr Betriebssystem für dein Unternehmen.</span>
-          <span class="en">Tools that work together. ERP, CRM, shops, integrations — less patchwork, more of an operating system for the company.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">groups</span>
-        <h3><span class="de">Recruiting</span><span class="en">Recruiting</span></h3>
-        <p>
-          <span class="de">Die richtigen Leute finden und halten. Recruiting, Onboarding, Prozesse — damit dein Team wächst, ohne dass HR dein Fulltime-Job wird.</span>
-          <span class="en">Find the right people and keep them. Recruiting, onboarding, process — so the team can grow without HR becoming your full-time job.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">verified</span>
-        <h3><span class="de">QM</span><span class="en">Quality</span></h3>
-        <p>
-          <span class="de">Prozesse, die halten. Audits, Chargendoku, Reklamationen — damit Qualität nicht vom Zufall abhängt, wenn die Stückzahl steigt.</span>
-          <span class="en">Process that holds. Audits, batch records, complaints — so quality doesn’t become luck when volume goes up.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">auto_awesome</span>
-        <h3><span class="de">K.I.</span><span class="en">AI</span></h3>
-        <p>
-          <span class="de">Automatisieren, wo es Sinn ergibt. Text, Daten, interne Abläufe — KI als Werkzeug, nicht als Show. Damit dein Team an dem arbeitet, was nur Menschen können.</span>
-          <span class="en">Automate where it actually helps. Copy, data, internal work — AI as a tool, not a show. So the team spends time on what only people can do.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">precision_manufacturing</span>
-        <h3><span class="de">Produktion und Verpackung</span><span class="en">Production &amp; packaging</span></h3>
-        <p>
-          <span class="de">Abfüllung, Konfektionierung, Packmittel. Wir bringen dein Produkt in eine Form, die Praxen und Lager verstehen — ohne dass du eine eigene Linie bauen musst.</span>
-          <span class="en">Filling, packing, packaging. We get the product into a format clinics and warehouses actually work with — without you having to build a line.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">policy</span>
-        <h3><span class="de">Regulatory Affairs</span><span class="en">Regulatory Affairs</span></h3>
-        <p>
-          <span class="de">Zulassung, Kennzeichnung, Vigilanz. Wir kennen die Regeln in der Tiergesundheit — damit dein Produkt darf, was es verspricht.</span>
-          <span class="en">Registration, labelling, vigilance. We know the rules in animal health — so the product is allowed to do what it claims.</span>
-        </p>
-      </article>
-      <article class="stack__item flow reveal">
-        <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">account_tree</span>
-        <h3><span class="de">Project Management</span><span class="en">Project Management</span></h3>
-        <p>
-          <span class="de">Viele Baustellen, ein Takt. Launch, Integration, Umbau — wir halten Termine und Abhängigkeiten, damit nichts zwischen den Stühlen liegt.</span>
-          <span class="en">A lot of moving pieces, one tempo. Launch, integration, rebuild — we keep dates and dependencies in line, so nothing falls between the cracks.</span>
-        </p>
-      </article>
-    </div>
-  </div>
-</section>
 
 <!-- MARKEN -->
 <section class="brands" id="marken">
@@ -3822,7 +3987,7 @@
     </div>
 
     <div class="brands__list">
-      <article class="brands__brand brands__brand--solid brands__brand--solid-before reveal" id="marke-inuvet">
+      <article class="brands__brand reveal" id="marke-inuvet">
         <div class="brands__top">
           <div class="brands__head">
             <h3 class="brands__name">
@@ -3882,10 +4047,6 @@
         <span><span class="de">Geschäftsführerin von Inuvet</span><span class="en">Managing Director of Inuvet</span></span>
       </footer>
     </div>
-    <p class="photo-credit">
-      <span class="de">Bild: Planet Sommerparty 2026</span>
-      <span class="en">Image: Planet Summer Party 2026</span>
-    </p>
   </section>
 
   <div class="container">
@@ -4046,6 +4207,30 @@
     </div>
   </div>
 </section>
+
+<!-- STATS -->
+<section class="stat-strip" id="stats">
+  <div class="container">
+    <div class="stat-strip__grid">
+      <div class="stat-strip__item reveal">
+        <div class="stat-strip__num"><span class="counter" data-target="2011" data-start="2000">2000</span></div>
+        <p class="stat-strip__label"><span class="de">Gründung des ersten Unternehmens</span><span class="en">We started in</span></p>
+      </div>
+      <div class="stat-strip__item reveal">
+        <div class="stat-strip__num"><span class="counter" data-target="150" data-suffix="+">0</span></div>
+        <p class="stat-strip__label"><span class="de">Mitarbeitende in der Gruppe</span><span class="en">People in the group</span></p>
+      </div>
+      <div class="stat-strip__item reveal">
+        <div class="stat-strip__num"><span class="counter" data-target="4">0</span></div>
+        <p class="stat-strip__label"><span class="de">Marken unter einem Dach</span><span class="en">Brands</span></p>
+      </div>
+      <div class="stat-strip__item reveal">
+        <div class="stat-strip__num"><span class="counter" data-target="20" data-prefix="&gt;" data-suffix="%" data-start="0">&gt;0%</span></div>
+        <p class="stat-strip__label"><span class="de">Ø jährliches Umsatzwachstum der Gruppe</span><span class="en">Yearly growth</span></p>
+      </div>
+    </div>
+  </div>
+</section>
 </div>
 
 <!-- TEAM -->
@@ -4126,99 +4311,6 @@
     </div>
   </div>
 </div>
-
-<!-- PARTNERSCHAFT -->
-<section class="fit fit--deal" id="partnerschaft">
-  <div class="container">
-    <div class="section-head section-head--reveal reveal">
-      <div>
-        <h2>
-          <span class="de">Wie die Übergabe mit uns aussieht, entscheiden wir gemeinsam.</span>
-          <span class="en">We’ll figure out the handoff together.</span>
-        </h2>
-      </div>
-    </div>
-    <ul class="fit__list">
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">100%-Verkauf. Du übergibst komplett — sofort oder mit Übergangsphase.</span>
-          <span class="en">A full sale. You hand everything over — now, or with a transition.</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Teilverkauf. Du gibst einen Teil ab und führst dein Unternehmen als Teil der Gruppe weiter.</span>
-          <span class="en">A partial sale. You sell a stake and keep running the company as part of the group.</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Rückbeteiligung. Auf Wunsch bleibst du beteiligt — die Details gehören ins Gespräch, nicht auf eine Webseite.</span>
-          <span class="en">You keep a stake, if you want. Those details belong in a conversation, not on a website.</span>
-        </p>
-      </li>
-    </ul>
-    <div class="section-head section-head--reveal reveal fit__subhead">
-      <div>
-        <h2>
-          <span class="de">Und deine Rolle danach?</span>
-          <span class="en">And your role after?</span>
-        </h2>
-      </div>
-    </div>
-    <ul class="fit__list">
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Weiter Verantwortung übernehmen?</span>
-          <span class="en">Stay in charge?</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Als Berater begleiten?</span>
-          <span class="en">Stay on as an advisor?</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Gesellschafter bleiben?</span>
-          <span class="en">Stay a shareholder?</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Aus dem Tagesgeschäft aussteigen?</span>
-          <span class="en">Step back from the day-to-day?</span>
-        </p>
-      </li>
-    </ul>
-    <p class="fit__payoff reveal">
-      <span class="de">Dein Einsatz soll sich auszahlen. Natürlich bekommst du einen fairen Preis — und die Gewissheit, dass dein Unternehmen, deine Mitarbeiter und deine Idee in guten Händen sind.</span>
-      <span class="en">This should work for you. A fair price, of course — and the certainty that your company, your people and your idea are in good hands.</span>
-    </p>
-  </div>
-</section>
 
 <!-- KRITERIEN -->
 <section class="fit" id="kriterien">
@@ -4338,7 +4430,7 @@
   <div class="container">
     <div class="section-head section-head--reveal reveal">
       <div>
-        <h2><span class="de">Ist Planet die richtige Nachfolge?</span><span class="en">Are we the right successor?</span></h2>
+        <h2><span class="de">Passt dein Unternehmen zu uns?</span><span class="en">Is this a fit?</span></h2>
       </div>
     </div>
     <div class="contact-layout contact-layout--entry">
@@ -4830,6 +4922,65 @@ function toggleLang() {
   render();
 })();
 
+/* Full-Bleed-Fotos: weich beim Einblenden, weich beim Verlassen */
+(function() {
+  const roots = [...document.querySelectorAll('.hero-full, [data-quote-type], [data-quote-scroll]')]
+    .filter((root) => root.querySelector('img'));
+  if (!roots.length) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    roots.forEach((root) => root.style.setProperty('--media-blur', '0px'));
+    return;
+  }
+
+  const start = performance.now();
+  const introMs = 1600;
+  const maxBlur = window.matchMedia('(max-width: 640px)').matches ? 16 : 24;
+
+  function smoothstep(t) {
+    t = Math.max(0, Math.min(1, t));
+    return t * t * (3 - 2 * t);
+  }
+
+  function edge(rect, vh) {
+    if (rect.bottom <= 0 || rect.top >= vh) return 1;
+    const enter = 1 - smoothstep((vh - rect.top) / (vh * 0.5));
+    const leave = 1 - smoothstep(rect.bottom / (vh * 0.55));
+    return Math.max(enter, leave);
+  }
+
+  function update() {
+    const vh = window.innerHeight;
+    const intro = 1 - smoothstep((performance.now() - start) / introMs);
+    roots.forEach((root) => {
+      const amount = root.classList.contains('hero-full')
+        ? Math.max(intro, edge(root.getBoundingClientRect(), vh))
+        : edge(root.getBoundingClientRect(), vh);
+      root.style.setProperty('--media-blur', `${(amount * maxBlur).toFixed(2)}px`);
+    });
+  }
+
+  let tick = false;
+  function onScroll() {
+    if (tick) return;
+    tick = true;
+    requestAnimationFrame(() => {
+      update();
+      tick = false;
+    });
+  }
+
+  function introLoop() {
+    update();
+    if (performance.now() - start < introMs + 80) {
+      requestAnimationFrame(introLoop);
+    }
+  }
+  requestAnimationFrame(introLoop);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+})();
+
 /* Zitate — soft Fade (quote-type) + Parallax-Band (quote-scroll); Nav teilt --quote-bg */
 (function() {
   const softRoots = [...document.querySelectorAll('[data-quote-type]')];
@@ -4971,72 +5122,6 @@ function toggleLang() {
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll(revealSelectors).forEach(el => observer.observe(el));
-  }
-})();
-
-(function() {
-  const mobile = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 1024px)');
-  if (!mobile.matches) return;
-
-  const hosts = [...document.querySelectorAll(
-    '.hero-full__media, .pillar-orbit__media, .quote-scroll__media, .team-strip__photo, .quote-type__bg'
-  )];
-  if (!hosts.length) return;
-
-  function paint(canvas, cssW, cssH) {
-    const dpr = window.devicePixelRatio || 1;
-    const w = Math.max(1, Math.ceil(cssW * dpr));
-    const h = Math.max(1, Math.ceil(cssH * dpr));
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-    canvas.style.width = `${w / dpr}px`;
-    canvas.style.height = `${h / dpr}px`;
-
-    const ctx = canvas.getContext('2d', { alpha: true });
-    const img = ctx.createImageData(w, h);
-    const data = img.data;
-    const cell = Math.max(1, Math.round(dpr));
-    for (let y = 0; y < h; y++) {
-      const cy = Math.floor(y / cell);
-      for (let x = 0; x < w; x++) {
-        if (((Math.floor(x / cell) + cy) & 1) === 0) {
-          const i = (y * w + x) << 2;
-          data[i + 2] = 255;
-          data[i + 3] = 255;
-        }
-      }
-    }
-    ctx.putImageData(img, 0, 0);
-  }
-
-  const canvases = hosts.map((host) => {
-    const canvas = document.createElement('canvas');
-    canvas.className = 'photo-raster-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    host.appendChild(canvas);
-    return { host, canvas };
-  });
-
-  function measure() {
-    canvases.forEach(({ host, canvas }) => {
-      const r = host.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) return;
-      paint(canvas, r.width, r.height);
-    });
-  }
-
-  measure();
-  requestAnimationFrame(measure);
-  window.addEventListener('load', measure);
-  window.addEventListener('resize', measure);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', measure);
-  }
-  if ('ResizeObserver' in window) {
-    const ro = new ResizeObserver(measure);
-    hosts.forEach((host) => ro.observe(host));
   }
 })();
 </script>

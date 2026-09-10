@@ -56,8 +56,15 @@ Patterns that live in the product (and as live examples in `UX-Styleguide.html`)
 - Versand gesammelt über FormSubmit an `torsten@plnt.group`, danach der Wellenbrecher-Screen: Antwort in 2 Werktagen.
 - Mail, Telefon und WhatsApp stehen bewusst **nicht** neben dem Einstieg — sie würden den Filter aushebeln. `hello@plnt.group` bleibt nur im Impressum und in der Fehlermeldung des Formulars.
 
+## Scroll-Farbe (Blau-Bänder)
+
+- Die Seitenfarbe sitzt **nur auf `html`** (`--bg-mix` / `--bg-dark-mix`). Wrapper `[data-band-blue]`, Sektionen und Content bleiben **transparent**. Weiß→Blau und Blau→Weiß entstehen durch den Scroll-Fade — **keine Sektions-Hintergründe, keine Verläufe, keine `::before`-Flächen**, um eine Kante zu kaschieren.
+- Eine harte Kante heißt fast immer: irgendwo liegt eine **eigene opake Fläche** (Weißband, `background` auf der Sektion, `position: fixed` über den Viewport). Die Fläche wegnehmen, nicht den Fade nachbauen.
+- Typo im Band fadet mit (`--text-invert`), analog `#mission`, `#team`, `#wege`.
+
 ## Nachfolge-Variante (`planet-website-nachfolge.html`)
 
 - Eigene URL, nicht ein Modus der Hauptseite. Zielgruppe: Unternehmer, die ihr Unternehmen übergeben wollen — nicht um jeden Preis.
 - Kein Wachstumspfad: Sektion `#wege` ist „Du bestimmst das Tempo“ (gehen / bleiben / erst reden). Der Fragebogen fragt Rolle statt Wachstum/Nachfolge und sendet immer `Weg: Nachfolge` plus `Quelle: Nachfolge-Seite`.
 - Mail-Betreff: `Planet Fragebogen Nachfolge — {Unternehmen}`.
+- **`#marken` folgt direkt auf das Blau-Band** (`#unterschied` · `#grundsatz-zitat` · `#mission`). Deshalb darf Inuvet **kein** `brands__brand--solid`-Weißband haben — das war die Kante unter „Das haben wir schon mal gemacht.“ Weißband nur bei EQX (`--solid-after`), damit Johannas `#zitat` darunter hart abschließt. `#marke-inuvet` bleibt eine normale, transparente Markenzeile.
