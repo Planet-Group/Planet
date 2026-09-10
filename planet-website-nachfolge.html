@@ -109,11 +109,17 @@
     width: var(--el-w, 0px);
     height: var(--el-h, 0px);
     overflow: hidden;
+    overflow: clip;
+    isolation: isolate;
+    clip-path: inset(0);
     pointer-events: none;
     animation: photo-raster-win linear both;
     animation-timeline: scroll(root);
   }
-  .photo-raster-win--circle { border-radius: 50%; }
+  .photo-raster-win--circle {
+    border-radius: 50%;
+    clip-path: circle(50% at 50% 50%);
+  }
   .photo-raster-pat {
     position: absolute;
     left: 0;
