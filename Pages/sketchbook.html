@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="de" data-paper="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Planet — SketchBook</title>
+<link rel="stylesheet" href="https://use.typekit.net/phj5hyp.css?v=2026-05-25">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link rel="stylesheet" href="../planet.css">
+<style>
+  :root {
+    --paper: var(--planet-primary);
+    --ink: var(--planet-white);
+    --pad-x: clamp(var(--space-3), 3vw, var(--space-6));
+    --true-white: #FFFFFF;
+    --true-black: #000000;
+    --true-blue: #0000FF;
+    --true-yellow: #D4FF00;
+  }
+
+  html, body {
+    height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    background: var(--paper) !important;
+    color: var(--planet-black) !important;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body {
+    cursor: none;
+  }
+
+  #paper {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent;
+    z-index: 1;
+    touch-action: none;
+  }
+
+  /* —— Nav: wie Cockpit —— */
+  .sketch-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    pointer-events: none;
+  }
+  .sketch-nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--pad-x);
+    min-height: var(--nav-height);
+    box-sizing: border-box;
+  }
+  .sketch-brand {
+    pointer-events: auto;
+    font-weight: var(--weight-display);
+    font-size: var(--text-h3);
+    color: var(--planet-primary);
+    text-decoration: none;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .sketch-brand:hover { text-decoration: none; opacity: 0.75; }
+  html[data-paper="black"] .sketch-brand,
+  html[data-paper="blue"] .sketch-brand {
+    color: var(--true-white);
+  }
+
+  /* —— Stift-Cursor —— */
+  .pen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    pointer-events: none;
+    transform: translate(-100px, -100px);
+  }
+  .pen__aim {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 1.5px solid var(--aim);
+    border-radius: 50%;
+    opacity: 0.45;
+  }
+  .pen__tip {
+    position: absolute;
+    width: var(--nib);
+    height: var(--nib);
+    margin: calc(var(--nib) / -2) 0 0 calc(var(--nib) / -2);
+    background: var(--ink);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px var(--aim);
+  }
+  html.is-over-ui,
+  html.is-over-ui body { cursor: auto; }
+  html.is-over-ui .pen { display: none; }
+  html.is-drawing .pen__aim { opacity: 0.2; }
+
+  /* —— Werkzeugleiste —— */
+  .tools {
+    position: fixed;
+    left: 50%;
+    bottom: max(var(--space-3), env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: calc(100vw - var(--space-4));
+    padding: 10px 12px;
+    background: var(--true-white);
+    border: 1.5px solid var(--true-black);
+    border-radius: var(--radius-pill);
+    cursor: auto;
+    pointer-events: auto;
+  }
+  .tools__group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tools__group + .tools__group {
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--planet-tint);
+  }
+  .tools__label {
+    font-size: 12px;
+    font-weight: var(--weight-display);
+    letter-spacing: 0.02em;
+    color: var(--true-black);
+    opacity: 0.45;
+    line-height: 1;
+    padding-right: 2px;
+  }
+
+  .nib-btn,
+  .swatch,
+  .tool-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .nib-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-circle);
+  }
+  .nib-btn i {
+    display: block;
+    width: var(--w);
+    height: var(--w);
+    border-radius: 50%;
+    background: var(--true-black);
+    box-shadow: 0 0 0 1px var(--planet-tint);
+  }
+  .nib-btn.is-on {
+    background: var(--planet-neutral);
+  }
+  .nib-btn.is-on i {
+    background: var(--planet-primary);
+    box-shadow: none;
+  }
+
+  .swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-circle);
+    background: var(--c);
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--true-black) 18%, transparent);
+  }
+  .swatch.is-on {
+    box-shadow:
+      0 0 0 2px var(--true-white),
+      0 0 0 4px var(--planet-primary);
+  }
+
+  .tool-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-circle);
+    color: var(--true-black);
+  }
+  .tool-btn:hover { background: var(--planet-neutral); }
+  .tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .tool-btn .material-icons-outlined { font-size: var(--icon); }
+
+  @media (max-width: 720px) {
+    .tools {
+      border-radius: var(--radius-card);
+      gap: var(--space-1);
+      padding: 10px;
+    }
+    .tools__group + .tools__group {
+      padding-left: 10px;
+    }
+    .tools__label { display: none; }
+    .sketch-brand { font-size: var(--text-h4); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="paper" aria-label="SketchBook"></canvas>
+<div class="pen" id="pen" hidden>
+  <span class="pen__aim"></span>
+  <span class="pen__tip"></span>
+</div>
+
+<header class="sketch-nav">
+  <div class="sketch-nav__inner">
+    <a class="sketch-brand" href="cockpit.html">Planet</a>
+  </div>
+</header>
+
+<aside class="tools" id="tools" aria-label="Werkzeuge">
+  <div class="tools__group" role="group" aria-label="Strichstärke">
+    <span class="tools__label">Strich</span>
+  </div>
+  <div class="tools__group" role="radiogroup" aria-label="Stiftfarbe">
+    <span class="tools__label">Stift</span>
+  </div>
+  <div class="tools__group" role="radiogroup" aria-label="Hintergrund">
+    <span class="tools__label">Grund</span>
+  </div>
+  <div class="tools__group">
+    <button class="tool-btn" type="button" id="btn-undo" aria-label="Rückgängig" title="Rückgängig">
+      <span class="material-icons-outlined" aria-hidden="true">undo</span>
+    </button>
+    <button class="tool-btn" type="button" id="btn-clear" aria-label="Blatt leeren" title="Blatt leeren">
+      <span class="material-icons-outlined" aria-hidden="true">delete_outline</span>
+    </button>
+    <button class="tool-btn" type="button" id="btn-save" aria-label="Speichern" title="Als PNG speichern">
+      <span class="material-icons-outlined" aria-hidden="true">download</span>
+    </button>
+  </div>
+</aside>
+
+<script>
+(function () {
+  const COLORS = [
+    { id: 'white',  hex: '#FFFFFF', name: 'Weiß' },
+    { id: 'black',  hex: '#000000', name: 'Schwarz' },
+    { id: 'blue',   hex: '#0000FF', name: 'Blau' },
+    { id: 'yellow', hex: '#D4FF00', name: 'Gelb' }
+  ];
+  const WIDTHS = [3, 8, 16, 32];
+  const STORE = 'planet-sketchbook-v2';
+
+  const html = document.documentElement;
+  const canvas = document.getElementById('paper');
+  const ctx = canvas.getContext('2d');
+  const penEl = document.getElementById('pen');
+  const tools = document.getElementById('tools');
+  const groups = tools.querySelectorAll('.tools__group');
+  const btnUndo = document.getElementById('btn-undo');
+  const btnClear = document.getElementById('btn-clear');
+  const btnSave = document.getElementById('btn-save');
+
+  const state = {
+    ink: '#FFFFFF',
+    paper: 'blue',
+    width: 8,
+    strokes: [],
+    current: null,
+    drawing: false
+  };
+
+  function paperHex() {
+    return COLORS.find((c) => c.id === state.paper).hex;
+  }
+
+  function aimColor(hex) {
+    return hex === '#FFFFFF' || hex === '#D4FF00' ? '#000000' : '#FFFFFF';
+  }
+
+  function applyChrome() {
+    html.dataset.paper = state.paper;
+    html.style.setProperty('--paper', paperHex());
+    html.style.setProperty('--ink', state.ink);
+    html.style.setProperty('--nib', state.width + 'px');
+    html.style.setProperty('--aim', aimColor(state.ink));
+    btnUndo.disabled = state.strokes.length === 0 && !state.current;
+  }
+
+  /* —— UI bauen —— */
+  WIDTHS.forEach((w) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'nib-btn' + (w === state.width ? ' is-on' : '');
+    btn.style.setProperty('--w', w + 'px');
+    btn.setAttribute('aria-label', 'Strich ' + w + ' Pixel');
+    btn.innerHTML = '<i></i>';
+    btn.addEventListener('click', () => {
+      state.width = w;
+      syncNibs();
+      applyChrome();
+      persist();
+    });
+    groups[0].appendChild(btn);
+  });
+
+  function addSwatches(group, key) {
+    COLORS.forEach((c) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'swatch';
+      btn.style.setProperty('--c', c.hex);
+      btn.dataset.id = c.id;
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-label', (key === 'ink' ? 'Stift ' : 'Hintergrund ') + c.name);
+      btn.addEventListener('click', () => {
+        if (key === 'ink') state.ink = c.hex;
+        else state.paper = c.id;
+        syncSwatches();
+        applyChrome();
+        persist();
+      });
+      group.appendChild(btn);
+    });
+  }
+  addSwatches(groups[1], 'ink');
+  addSwatches(groups[2], 'paper');
+
+  function syncNibs() {
+    groups[0].querySelectorAll('.nib-btn').forEach((btn, i) => {
+      btn.classList.toggle('is-on', WIDTHS[i] === state.width);
+    });
+  }
+  function syncSwatches() {
+    groups[1].querySelectorAll('.swatch').forEach((btn) => {
+      const on = COLORS.find((c) => c.id === btn.dataset.id).hex === state.ink;
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-checked', on);
+    });
+    groups[2].querySelectorAll('.swatch').forEach((btn) => {
+      const on = btn.dataset.id === state.paper;
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-checked', on);
+    });
+  }
+
+  /* —— Canvas —— */
+  function pointFrom(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function drawStroke(s, context) {
+    if (!s.points.length) return;
+    context.save();
+    context.strokeStyle = s.color;
+    context.fillStyle = s.color;
+    context.lineWidth = s.width;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    const pts = s.points;
+    if (pts.length === 1) {
+      context.beginPath();
+      context.arc(pts[0].x, pts[0].y, s.width / 2, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+      return;
+    }
+    context.beginPath();
+    context.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i].x + pts[i + 1].x) / 2;
+      const my = (pts[i].y + pts[i + 1].y) / 2;
+      context.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+    }
+    const last = pts[pts.length - 1];
+    context.lineTo(last.x, last.y);
+    context.stroke();
+    context.restore();
+  }
+
+  function redraw() {
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    state.strokes.forEach((s) => drawStroke(s, ctx));
+    if (state.current) drawStroke(state.current, ctx);
+  }
+
+  function fit() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    redraw();
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify({
+        ink: state.ink,
+        paper: state.paper,
+        width: state.width,
+        strokes: state.strokes
+      }));
+    } catch (err) {}
+  }
+
+  function restore() {
+    try {
+      const raw = localStorage.getItem(STORE);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.ink) state.ink = data.ink;
+      if (data.paper) state.paper = data.paper;
+      if (data.width) state.width = data.width;
+      if (Array.isArray(data.strokes)) state.strokes = data.strokes;
+    } catch (err) {}
+  }
+
+  function movePen(e) {
+    penEl.hidden = false;
+    penEl.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
+  }
+
+  function overUI(e) {
+    return Boolean(e.target.closest('.tools, .sketch-brand'));
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (overUI(e)) return;
+    e.preventDefault();
+    canvas.setPointerCapture(e.pointerId);
+    state.drawing = true;
+    html.classList.add('is-drawing');
+    state.current = {
+      color: state.ink,
+      width: state.width,
+      points: [pointFrom(e)]
+    };
+    redraw();
+    movePen(e);
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    movePen(e);
+    if (!state.drawing || !state.current) return;
+    const p = pointFrom(e);
+    const last = state.current.points[state.current.points.length - 1];
+    const dx = p.x - last.x;
+    const dy = p.y - last.y;
+    if (dx * dx + dy * dy < 1.5) return;
+    state.current.points.push(p);
+    redraw();
+  });
+
+  function endStroke(e) {
+    if (!state.drawing) return;
+    state.drawing = false;
+    html.classList.remove('is-drawing');
+    if (state.current && state.current.points.length) {
+      state.strokes.push(state.current);
+    }
+    state.current = null;
+    applyChrome();
+    persist();
+    if (e && canvas.hasPointerCapture(e.pointerId)) {
+      canvas.releasePointerCapture(e.pointerId);
+    }
+  }
+
+  canvas.addEventListener('pointerup', endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+  window.addEventListener('blur', () => endStroke());
+
+  window.addEventListener('pointermove', (e) => {
+    const ui = overUI(e);
+    html.classList.toggle('is-over-ui', ui);
+    if (!ui) movePen(e);
+  });
+
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  btnUndo.addEventListener('click', () => {
+    state.strokes.pop();
+    redraw();
+    applyChrome();
+    persist();
+  });
+
+  btnClear.addEventListener('click', () => {
+    if (!state.strokes.length) return;
+    state.strokes = [];
+    redraw();
+    applyChrome();
+    persist();
+  });
+
+  btnSave.addEventListener('click', () => {
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+    const ex = exportCanvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    ex.fillStyle = paperHex();
+    ex.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+    ex.setTransform(dpr, 0, 0, dpr, 0, 0);
+    state.strokes.forEach((s) => drawStroke(s, ex));
+    const a = document.createElement('a');
+    a.href = exportCanvas.toDataURL('image/png');
+    a.download = 'planet-sketchbook.png';
+    a.click();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if ((e.metaKey || e.ctrlKey) && key === 'z') {
+      e.preventDefault();
+      btnUndo.click();
+    }
+  });
+
+  window.addEventListener('resize', fit);
+
+  restore();
+  syncNibs();
+  syncSwatches();
+  applyChrome();
+  fit();
+})();
+</script>
+</body>
+</html>
