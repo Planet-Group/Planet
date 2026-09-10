@@ -94,6 +94,36 @@
     border-bottom: var(--line-width) solid var(--line-color);
   }
 
+  /*
+    1-Pixel-Schachbrett, fest am Viewport — nie am Foto.
+    Eine body-Schicht (kein transform-Ahn) wird auf die Foto-Rechtecke
+    geclippt. Kreise dürfen darunter rotieren, das Raster steht.
+    Quote-Type hat schon ein eigenes position:fixed (Stacking-Kontext):
+    dort liegt eine zweite, gleiche Schicht zwischen Bild und Text.
+  */
+  .photo-raster {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background-image: repeating-conic-gradient(
+      var(--planet-primary) 0deg 90deg,
+      transparent 90deg 180deg
+    );
+    background-size: 2px 2px;
+    background-position: 0 0;
+    image-rendering: pixelated;
+  }
+  .photo-raster[hidden] { display: none; }
+  .photo-raster--quote {
+    z-index: 1;
+    opacity: var(--quote-bg);
+    clip-path: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .photo-raster--quote { display: none; }
+  }
+
   /* Full-Screen Hero */
   .hero-full {
     position: relative;
@@ -127,7 +157,7 @@
   }
   .hero-full__content {
     position: relative;
-    z-index: 1;
+    z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -160,7 +190,7 @@
     bottom: var(--space-5);
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1;
+    z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -182,7 +212,7 @@
     position: absolute;
     right: max(var(--space-2), env(safe-area-inset-right, 0px));
     bottom: var(--space-5);
-    z-index: 2;
+    z-index: 5;
     margin: 0;
     writing-mode: vertical-rl;
     transform: rotate(180deg);
@@ -1140,7 +1170,7 @@
   .quote-scroll {
     --quote-y: 0px;
     position: relative;
-    z-index: 1;
+    z-index: auto;
     min-height: 100svh;
     display: flex;
     flex-direction: column;
@@ -1181,7 +1211,7 @@
   }
   .quote-scroll__content {
     position: relative;
-    z-index: 1;
+    z-index: 5;
     width: min(100%, 1480px);
     padding: 0 var(--space-5);
     text-align: center;
@@ -1294,6 +1324,9 @@
     bottom: 0;
     left: -0.08em;
     right: -0.08em;
+  }
+  #grundsatz-zitat .quote-type__content {
+    z-index: 2;
   }
   #grundsatz-zitat .photo-credit {
     z-index: 2;
@@ -2862,6 +2895,8 @@
 </head>
 <body>
 
+<div class="photo-raster" hidden aria-hidden="true"></div>
+
 <nav class="nav nav--on-hero">
   <div class="nav-inner">
     <a class="logo" href="#top">Planet</a>
@@ -3486,6 +3521,7 @@
     <img src="assets/images/149---Inuvet-Sommerfest-2026_Tag-01_149.jpg" alt="">
     <div class="quote-type__bg-veil"></div>
   </div>
+  <div class="photo-raster photo-raster--quote" aria-hidden="true"></div>
   <div class="quote-type__content reveal">
     <blockquote class="quote-type__quote">
       <p class="quote-type__text">
@@ -4904,6 +4940,59 @@ function toggleLang() {
     }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll(revealSelectors).forEach(el => observer.observe(el));
   }
+})();
+
+(function() {
+  const layer = document.querySelector('.photo-raster:not(.photo-raster--quote)');
+  if (!layer) return;
+
+  const photos = [...document.querySelectorAll(
+    '.hero-full__media, .pillar-orbit__media, .quote-scroll__media, .team-strip__photo'
+  )];
+  const circleSel = '.pillar-orbit__media, .team-strip__photo';
+
+  function clipPathFromPhotos() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let d = '';
+
+    photos.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return;
+      if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) return;
+
+      if (el.matches(circleSel)) {
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const rad = Math.min(r.width, r.height) / 2;
+        d += `M ${cx - rad},${cy} a ${rad},${rad} 0 1,0 ${rad * 2},0 a ${rad},${rad} 0 1,0 ${-rad * 2},0 `;
+      } else {
+        d += `M ${r.left},${r.top} h ${r.width} v ${r.height} h ${-r.width} z `;
+      }
+    });
+
+    return d;
+  }
+
+  function paint() {
+    const d = clipPathFromPhotos();
+    if (!d) {
+      layer.hidden = true;
+      layer.style.clipPath = '';
+      layer.style.webkitClipPath = '';
+      return;
+    }
+    layer.hidden = false;
+    const path = `path('${d.trim()}')`;
+    layer.style.clipPath = path;
+    layer.style.webkitClipPath = path;
+  }
+
+  function loop() {
+    paint();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
