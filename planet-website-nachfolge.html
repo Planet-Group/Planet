@@ -980,6 +980,9 @@
     #varianten .stance__body p {
       color: var(--planet-white);
     }
+    #varianten .pillar-orbit__caption text {
+      fill: var(--planet-white);
+    }
     #wege {
       --text-invert: 1;
     }
@@ -2354,6 +2357,22 @@
       var(--planet-white)
     );
   }
+  #varianten .pillar-orbit__caption text {
+    fill: color-mix(
+      in srgb,
+      var(--planet-primary) calc((1 - var(--text-invert, 0)) * 100%),
+      var(--planet-white)
+    );
+  }
+  #varianten .pillar-orbit__caption text.en { display: none; }
+  body.lang-en #varianten .pillar-orbit__caption text.de { display: none; }
+  body.lang-en #varianten .pillar-orbit__caption text.en { display: block; }
+  #haltung .pillar-orbit__caption text.en { display: none; }
+  body.lang-en #haltung .pillar-orbit__caption text.de { display: none; }
+  body.lang-en #haltung .pillar-orbit__caption text.en { display: block; }
+  #mission .pillar-orbit__caption text.en { display: none; }
+  body.lang-en #mission .pillar-orbit__caption text.de { display: none; }
+  body.lang-en #mission .pillar-orbit__caption text.en { display: block; }
 
   /* #stats — im Blau-Band von #zahlen */
   #stats {
@@ -3019,8 +3038,8 @@
   <nav class="nav-overlay-links">
     <a class="nav-overlay-link" href="#unternehmer"><span class="de">Abgeben</span><span class="en">Handing over</span></a>
     <a class="nav-overlay-link" href="#varianten"><span class="de">Ganz oder Teile</span><span class="en">All or parts</span></a>
-    <a class="nav-overlay-link" href="#wege"><span class="de">Tempo</span><span class="en">Pace</span></a>
     <a class="nav-overlay-link" href="#infrastruktur"><span class="de">Infrastruktur</span><span class="en">Infrastructure</span></a>
+    <a class="nav-overlay-link" href="#wege"><span class="de">Tempo</span><span class="en">Pace</span></a>
     <a class="nav-overlay-link" href="#potenzial"><span class="de">Potenzial</span><span class="en">Potential</span></a>
     <a class="nav-overlay-link" href="#haltung"><span class="de">Haltung</span><span class="en">Who we are</span></a>
     <a class="nav-overlay-link" href="#unterschied"><span class="de">Unterschied</span><span class="en">Why us</span></a>
@@ -3405,8 +3424,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">aber es gibt keinen Nachfolger in der Familie. Und keinen Käufer, dem du das anvertrauen würdest.</span>
-          <span class="en">but there’s no successor in the family. And no buyer you’d trust with it.</span>
+          <span class="de">aber es gibt keinen Nachfolger, dem du das anvertrauen würdest.</span>
+          <span class="en">but there’s no successor you’d trust with it.</span>
         </p>
       </li>
       <li class="fit__item reveal">
@@ -3461,8 +3480,8 @@
           <span class="fit__rule"></span>
         </div>
         <p class="fit__text">
-          <span class="de">Nicht mehr das Tagesgeschäft, das die Zeit frisst für das, was du am besten kannst.</span>
-          <span class="en">No more day-to-day eating the time for what you do best.</span>
+          <span class="de">Nicht mehr das Tagesgeschäft, das deine Zeit frisst.</span>
+          <span class="en">No more day-to-day eating your time.</span>
         </p>
       </li>
     </ul>
@@ -3473,7 +3492,7 @@
   </div>
 </section>
 
-<!-- VARIANTEN + WEGE — ein Blau-Band -->
+<!-- VARIANTEN — Blau-Band -->
 <div data-band-blue>
 <section class="stance" id="varianten">
   <div class="container">
@@ -3491,6 +3510,17 @@
           <div class="pillar-orbit__media">
             <div class="pillar-circle-img" style="background-image: url('assets/images/2.jpeg');" role="img" aria-label=""></div>
           </div>
+          <svg class="pillar-orbit__caption" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <defs>
+              <path id="orbit-varianten" fill="none" d="M50,50 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
+            </defs>
+            <text class="de">
+              <textPath href="#orbit-varianten" xlink:href="#orbit-varianten" startOffset="4%">Bei dir und bei uns dreht sich alles um Tiergesundheit.</textPath>
+            </text>
+            <text class="en">
+              <textPath href="#orbit-varianten" xlink:href="#orbit-varianten" startOffset="4%">For you and for us, it all revolves around animal health.</textPath>
+            </text>
+          </svg>
         </div>
       </div>
       <div class="stance__body flow reveal-slide-right">
@@ -3504,116 +3534,6 @@
         </p>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="paths paths-scroll" id="wege">
-  <div class="container">
-    <div class="section-head section-head--reveal reveal">
-      <div>
-        <h2>
-          <span class="de">Du bestimmst das Tempo. Und deine Rolle.</span>
-          <span class="en">You set the pace. And your role.</span>
-        </h2>
-      </div>
-    </div>
-    <div class="paths__grid reveal">
-      <article class="paths__way paths__way--a flow reveal">
-        <div class="paths__head">
-          <div class="paths__cue" aria-hidden="true">
-            <span class="paths__index">01</span>
-            <span class="paths__rule"></span>
-          </div>
-          <h2><span class="de">Erstmal nur reden</span><span class="en">Just talk first</span></h2>
-        </div>
-        <div class="paths__body flow">
-          <p>
-            <span class="de">Noch keine Entscheidung. Ein Gespräch reicht, um zu spüren, ob die Haltung stimmt — bevor irgendetwas formal wird.</span>
-            <span class="en">No decision yet. A conversation is enough to feel whether the stance is right — before anything gets formal.</span>
-          </p>
-        </div>
-      </article>
-      <article class="paths__way paths__way--b flow reveal">
-        <div class="paths__head">
-          <div class="paths__cue" aria-hidden="true">
-            <span class="paths__index">02</span>
-            <span class="paths__rule"></span>
-          </div>
-          <h2><span class="de">Ganz übergeben</span><span class="en">Hand over all of it</span></h2>
-        </div>
-        <div class="paths__body flow">
-          <p>
-            <span class="de">Die operative Führung liegt bei uns — sofort oder mit Übergangsphase. Du steigst aus, in deinem Tempo.</span>
-            <span class="en">Operations sit with us — right away or with a transition. You step out at your own pace.</span>
-          </p>
-        </div>
-      </article>
-      <article class="paths__way paths__way--c flow reveal">
-        <div class="paths__head">
-          <div class="paths__cue" aria-hidden="true">
-            <span class="paths__index">03</span>
-            <span class="paths__rule"></span>
-          </div>
-          <h2><span class="de">Teile abgeben</span><span class="en">Hand over parts</span></h2>
-        </div>
-        <div class="paths__body flow">
-          <p>
-            <span class="de">Teilverkauf oder Rückbeteiligung — die Rolle bleibt deine. Die Details gehören ins Gespräch, nicht auf eine Webseite.</span>
-            <span class="en">Partial sale or a stake you keep — the role stays yours. The details belong in a conversation, not on a website.</span>
-          </p>
-        </div>
-      </article>
-    </div>
-    <div class="section-head section-head--reveal reveal fit__subhead">
-      <div>
-        <h2>
-          <span class="de">Und deine Rolle danach?</span>
-          <span class="en">And your role after?</span>
-        </h2>
-      </div>
-    </div>
-    <ul class="fit__list">
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Weiter Verantwortung übernehmen?</span>
-          <span class="en">Stay in charge?</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Als Berater begleiten?</span>
-          <span class="en">Stay on as an advisor?</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Gesellschafter bleiben?</span>
-          <span class="en">Stay a shareholder?</span>
-        </p>
-      </li>
-      <li class="fit__item reveal">
-        <div class="fit__cue" aria-hidden="true">
-          <span class="fit__rule"></span>
-        </div>
-        <p class="fit__text">
-          <span class="de">Aus dem Tagesgeschäft aussteigen?</span>
-          <span class="en">Step back from the day-to-day?</span>
-        </p>
-      </li>
-    </ul>
-    <p class="fit__payoff reveal">
-      <span class="de">Dein Einsatz soll sich auszahlen. Natürlich bekommst du einen fairen Preis — und die Gewissheit, dass dein Unternehmen, deine Mitarbeiter und deine Idee in guten Händen sind.</span>
-      <span class="en">This should work for you. A fair price, of course — and the certainty that your company, your people and your idea are in good hands.</span>
-    </p>
   </div>
 </section>
 </div>
@@ -3708,7 +3628,7 @@
       </article>
       <article class="stack__item flow reveal">
         <span class="material-symbols-outlined icon--lg stack__icon" aria-hidden="true">badge</span>
-        <h3><span class="de">HR und Personalführung</span><span class="en">HR &amp; people management</span></h3>
+        <h3><span class="de">HR</span><span class="en">HR</span></h3>
         <p>
           <span class="de">Verträge, Zeiterfassung, Krankheit, Dienstpläne, Gespräche. Der Teil der Führung, der Kraft kostet und keinen Umsatz bringt — läuft bei uns, damit du ihn nicht mehr tragen musst.</span>
           <span class="en">Contracts, time tracking, sick leave, rosters, the hard conversations. The part of leading people that drains you and earns nothing — we run it, so you don’t have to carry it.</span>
@@ -3757,6 +3677,119 @@
     </div>
   </div>
 </section>
+
+<!-- WEGE — Blau-Band -->
+<div data-band-blue>
+<section class="paths paths-scroll" id="wege">
+  <div class="container">
+    <div class="section-head section-head--reveal reveal">
+      <div>
+        <h2>
+          <span class="de">Du bestimmst das Tempo. Und deine Rolle.</span>
+          <span class="en">You set the pace. And your role.</span>
+        </h2>
+      </div>
+    </div>
+    <div class="paths__grid reveal">
+      <article class="paths__way paths__way--a flow reveal">
+        <div class="paths__head">
+          <div class="paths__cue" aria-hidden="true">
+            <span class="paths__index">01</span>
+            <span class="paths__rule"></span>
+          </div>
+          <h2><span class="de">Ganz übergeben</span><span class="en">Hand over all of it</span></h2>
+        </div>
+        <div class="paths__body flow">
+          <p>
+            <span class="de">Die operative Führung liegt bei uns — sofort oder mit Übergangsphase. Du steigst aus, in deinem Tempo.</span>
+            <span class="en">Operations sit with us — right away or with a transition. You step out at your own pace.</span>
+          </p>
+        </div>
+      </article>
+      <article class="paths__way paths__way--b flow reveal">
+        <div class="paths__head">
+          <div class="paths__cue" aria-hidden="true">
+            <span class="paths__index">02</span>
+            <span class="paths__rule"></span>
+          </div>
+          <h2><span class="de">Teile abgeben</span><span class="en">Hand over parts</span></h2>
+        </div>
+        <div class="paths__body flow">
+          <p>
+            <span class="de">Teilverkauf oder Rückbeteiligung — die Rolle bleibt deine. Die Details gehören ins Gespräch, nicht auf eine Webseite.</span>
+            <span class="en">Partial sale or a stake you keep — the role stays yours. The details belong in a conversation, not on a website.</span>
+          </p>
+        </div>
+      </article>
+      <article class="paths__way paths__way--c flow reveal">
+        <div class="paths__head">
+          <div class="paths__cue" aria-hidden="true">
+            <span class="paths__index">03</span>
+            <span class="paths__rule"></span>
+          </div>
+          <h2><span class="de">Erstmal nur reden</span><span class="en">Just talk first</span></h2>
+        </div>
+        <div class="paths__body flow">
+          <p>
+            <span class="de">Noch keine Entscheidung. Ein Gespräch reicht, um zu spüren, ob die Haltung stimmt — bevor irgendetwas formal wird.</span>
+            <span class="en">No decision yet. A conversation is enough to feel whether the stance is right — before anything gets formal.</span>
+          </p>
+        </div>
+      </article>
+    </div>
+    <div class="section-head section-head--reveal reveal fit__subhead">
+      <div>
+        <h2>
+          <span class="de">Und deine Rolle danach?</span>
+          <span class="en">And your role after?</span>
+        </h2>
+      </div>
+    </div>
+    <ul class="fit__list">
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Weiter Verantwortung übernehmen?</span>
+          <span class="en">Stay in charge?</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Als Berater begleiten?</span>
+          <span class="en">Stay on as an advisor?</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Gesellschafter bleiben?</span>
+          <span class="en">Stay a shareholder?</span>
+        </p>
+      </li>
+      <li class="fit__item reveal">
+        <div class="fit__cue" aria-hidden="true">
+          <span class="fit__rule"></span>
+        </div>
+        <p class="fit__text">
+          <span class="de">Aus dem Tagesgeschäft aussteigen?</span>
+          <span class="en">Step back from the day-to-day?</span>
+        </p>
+      </li>
+    </ul>
+    <p class="fit__payoff reveal">
+      <span class="de">Dein Einsatz soll sich auszahlen. Natürlich bekommst du einen fairen Preis — und die Gewissheit, dass dein Unternehmen, deine Mitarbeiter und deine Idee in guten Händen sind.</span>
+      <span class="en">This should work for you. A fair price, of course — and the certainty that your company, your people and your idea are in good hands.</span>
+    </p>
+  </div>
+</section>
+</div>
 
 <!-- POTENZIAL -->
 <section class="fit fit--deal" id="potenzial">
@@ -3820,8 +3853,19 @@
       <div class="stance__media reveal-scale">
         <div class="pillar-orbit">
           <div class="pillar-orbit__media">
-            <div class="pillar-circle-img" role="img" aria-label=""></div>
+            <div class="pillar-circle-img" style="background-image: url('assets/images/3.jpeg');" role="img" aria-label=""></div>
           </div>
+          <svg class="pillar-orbit__caption" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <defs>
+              <path id="orbit-haltung" fill="none" d="M50,50 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
+            </defs>
+            <text class="de">
+              <textPath href="#orbit-haltung" xlink:href="#orbit-haltung" startOffset="6%">Für die Menschen. Und für die Tiere.  ·  Für die Menschen. Und für die Tiere.</textPath>
+            </text>
+            <text class="en">
+              <textPath href="#orbit-haltung" xlink:href="#orbit-haltung" startOffset="6%">For the people. And for the animals.  ·  For the people. And for the animals.</textPath>
+            </text>
+          </svg>
         </div>
       </div>
       <div class="stance__body flow reveal-slide-right">
@@ -3964,8 +4008,19 @@
       <div class="stance__media reveal-scale">
         <div class="pillar-orbit">
           <div class="pillar-orbit__media">
-            <div class="pillar-circle-img" role="img" aria-label=""></div>
+            <div class="pillar-circle-img" style="background-image: url('assets/images/4---Inuvet-Sommerfest-2026_Tag-01_004.jpg');" role="img" aria-label=""></div>
           </div>
+          <svg class="pillar-orbit__caption" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <defs>
+              <path id="orbit-mission" fill="none" d="M50,50 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
+            </defs>
+            <text class="de">
+              <textPath href="#orbit-mission" xlink:href="#orbit-mission" startOffset="4%">Unser Unternehmensziel heißt Glück.  ·  Unser Unternehmensziel heißt Glück.</textPath>
+            </text>
+            <text class="en">
+              <textPath href="#orbit-mission" xlink:href="#orbit-mission" startOffset="4%">Our goal as a company is happiness.  ·  Our goal as a company is happiness.</textPath>
+            </text>
+          </svg>
         </div>
       </div>
     </div>
